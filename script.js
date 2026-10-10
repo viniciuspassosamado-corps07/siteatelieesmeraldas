@@ -7,8 +7,8 @@ const setOpen = (open) => {
   toggleBtn.setAttribute('aria-label', open ? 'Fechar menu' : 'Abrir menu');
 };
 
-/* ofertas: carrossel automático */
-(() => {
+/* ofertas: carrossel automático (espera os produtos chegarem do banco) */
+Loja.pronto.then(() => {
   const card = document.getElementById('offers');
   if (!card) return;
   const slides = [...card.querySelectorAll('.slide')];
@@ -38,30 +38,11 @@ const setOpen = (open) => {
     if (e.animationName === 'fill') show(cur + 1);
   });
 
-  show(0);
-})();
+  if (slides.length) show(0);
+});
 
 /* "Ver": o card se expande em uma folha com foto, título persuasivo e botão de compra */
 (() => {
-  const copy = {
-    Esmeralda: ['O verde que hipnotiza.', 'Uma esmeralda de cor profunda e brilho raro. Poucas pessoas terão uma igual.'],
-    Safira: ['Azul profundo, valor eterno.', 'A safira que atravessa gerações. Presente que vira herança.'],
-    Rubi: ['Paixão em forma de pedra.', 'Vermelho intenso, raridade de verdade. Impossível passar despercebido.'],
-    Diamante: ['O brilho que você merece.', 'Lapidação perfeita, pureza absoluta. O diamante que ela nunca vai esquecer.'],
-    Ametista: ['Roxo real, presença rara.', 'Uma ametista que transforma qualquer produção em assinatura pessoal.'],
-    Topázio: ['Dourado que ilumina tudo.', 'Para quem nasceu para brilhar: um topázio com calor de pôr do sol.'],
-    Anel: ['O anel que ela vai lembrar para sempre.', 'Ouro e esmeralda em uma peça feita para marcar o momento mais importante.'],
-    Colar: ['Seja o centro das atenções.', 'Uma safira que cai exatamente onde o olhar procura. Elegância sem esforço.'],
-    Brincos: ['Brincos que roubam o olhar.', 'Rubis lapidados à mão que acendem o rosto assim que você entra.'],
-    Pulseira: ['Cada diamante, um motivo para brilhar.', 'Uma pulseira riviera que combina com tudo e nunca sai de moda.'],
-    Pingente: ['Delicadeza que fala mais alto.', 'Uma ametista em formato de gota, leve no pescoço e inesquecível no olhar.'],
-    Broche: ['Uma obra de arte para vestir.', 'Ouro trabalhado à mão com topázio central. Peça de colecionador.'],
-    'Esmeralda Colombiana': ['Oferta rara: o verde mais cobiçado do mundo.', 'Esmeralda colombiana de 2,41 ct com preço que não vai se repetir. Garanta antes que acabe.'],
-    'Colar Safira Real': ['Azul real com desconto de realeza.', 'Safira de 3,10 ct em ouro branco. Uma joia para ser lembrada, agora por muito menos.'],
-    'Brincos Rubi Imperial': ['Os brincos que todo mundo vai perguntar onde comprou.', 'Rubis de 1,85 ct em ouro 18k com 20% de desconto. Poucas unidades.'],
-    'Pulseira Riviera': ['Diamantes em cada centímetro do seu pulso.', 'A pulseira riviera clássica em ouro branco, com um desconto que raramente aparece.'],
-    'Pingente Ametista': ['Roxo que vira assinatura.', 'Ametista de 5,60 ct em prata 925. Delicado, marcante e com preço de oferta.']
-  };
   const EASE = 'cubic-bezier(.22,1,.36,1)';
   let current = null;
 
@@ -79,29 +60,31 @@ const setOpen = (open) => {
 
   const openSheet = (card) => {
     if (current) return;
+    const produto = Loja.produtos.find((p) => p.id === card.dataset.id);
+    if (!produto) return;
+    const { esc } = Loja;
     const isOffer = card.classList.contains('slide');
-    const name = card.querySelector('h3').textContent.trim();
-    const [title, text] = copy[name] || ['Peça única, feita para você.', 'Seleção exclusiva do nosso ateliê.'];
+    const name = produto.nome;
+    const title = produto.titulo || 'Peça única, feita para você.';
+    const text = produto.descricao || 'Seleção exclusiva do nosso ateliê.';
     const img = card.querySelector('.ph img, .tile img')?.src || '';
-    const price = isOffer
-      ? `${card.querySelector('.prices strong').textContent} <s>${card.querySelector('.prices s').textContent}</s>`
-      : card.querySelector('.card-foot span').textContent;
-    const kickerText = card.querySelector('p').textContent;
-    const kickerLine = isOffer ? kickerText : `${name} · ${kickerText.split('·')[1]?.trim() || ''}`;
+    const price = Loja.precoHtml(produto);
+    const detalhes = produto.detalhes || '';
+    const kickerLine = isOffer ? detalhes : `${name} · ${detalhes.split('·')[1]?.trim() || ''}`;
 
     const backdrop = document.createElement('div');
     backdrop.className = 'sheet-backdrop';
     const sheet = document.createElement('div');
     sheet.className = 'sheet';
     sheet.setAttribute('role', 'dialog');
-    sheet.setAttribute('aria-label', name);
+    sheet.setAttribute('aria-label', name);   // setAttribute já trata o texto como literal
     sheet.innerHTML = `
       <button class="sheet-close" aria-label="Fechar"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg></button>
-      <div class="sheet-photo"><img src="${img}" alt="${name}"></div>
+      <div class="sheet-photo"><img src="${esc(img)}" alt="${esc(name)}"></div>
       <div class="sheet-body">
-        <p class="sheet-kicker">${kickerLine}</p>
-        <h3>${title}</h3>
-        <p class="sheet-text">${text}</p>
+        <p class="sheet-kicker">${esc(kickerLine)}</p>
+        <h3>${esc(title)}</h3>
+        <p class="sheet-text">${esc(text)}</p>
         <div class="sheet-price">${price}</div>
         <a href="#" class="sheet-buy">Comprar agora</a>
         <p class="sheet-perks">Laudo gemológico · Envio segurado · 7 dias para devolução</p>

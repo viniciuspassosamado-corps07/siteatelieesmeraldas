@@ -104,6 +104,7 @@ const hexToRGB = (hex) => {
 
 async function start() {
   if (!mount) return;
+  await window.Loja?.pronto;   // o tom inicial vem do primeiro slide, que só existe depois da carga
   const { Renderer, Program, Mesh, Geometry, Triangle, RenderTarget } =
     await import('https://cdn.jsdelivr.net/npm/ogl@1.0.11/src/index.js');
 
