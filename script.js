@@ -68,6 +68,15 @@ Loja.pronto.then(() => {
     const title = produto.titulo || 'Peça única, feita para você.';
     const text = produto.descricao || 'Seleção exclusiva do nosso ateliê.';
     const img = card.querySelector('.ph img, .tile img')?.src || '';
+    // galeria: a primeira foto é a do card (para a abertura casar), as outras vêm do bucket
+    const extras = (produto.fotos || []).slice(1);
+    const fotosHtml = `<img src="${esc(img)}" alt="${esc(name)}">` +
+      extras.map((f, i) => `<img src="${esc(Loja.fotoUrl(f))}" data-fallback="${esc(Loja.fotoReserva(f))}" alt="${esc(name)} ${i + 2}" loading="lazy">`).join('');
+    const total = extras.length + 1;
+    const nav = total > 1 ? `
+        <button class="gal-arrow prev" aria-label="Foto anterior" hidden><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M15 5l-7 7 7 7"/></svg></button>
+        <button class="gal-arrow next" aria-label="Próxima foto"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M9 5l7 7-7 7"/></svg></button>
+        <div class="gal-dots">${Array.from({ length: total }, (_, i) => `<i${i === 0 ? ' class="on"' : ''}></i>`).join('')}</div>` : '';
     const price = Loja.precoHtml(produto);
     const detalhes = produto.detalhes || '';
     const kickerLine = isOffer ? detalhes : `${name} · ${detalhes.split('·')[1]?.trim() || ''}`;
@@ -80,7 +89,7 @@ Loja.pronto.then(() => {
     sheet.setAttribute('aria-label', name);   // setAttribute já trata o texto como literal
     sheet.innerHTML = `
       <button class="sheet-close" aria-label="Fechar"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg></button>
-      <div class="sheet-photo"><img src="${esc(img)}" alt="${esc(name)}"></div>
+      <div class="sheet-photo"><div class="gal">${fotosHtml}</div>${nav}</div>
       <div class="sheet-body">
         <p class="sheet-kicker">${esc(kickerLine)}</p>
         <h3>${esc(title)}</h3>
@@ -115,6 +124,24 @@ Loja.pronto.then(() => {
     backdrop.addEventListener('click', close);
     sheet.querySelector('.sheet-close').addEventListener('click', close);
     sheet.querySelector('.sheet-buy').addEventListener('click', (e) => e.preventDefault());
+
+    if (total > 1) {
+      const gal = sheet.querySelector('.gal');
+      const dots = [...sheet.querySelectorAll('.gal-dots i')];
+      const prev = sheet.querySelector('.gal-arrow.prev');
+      const next = sheet.querySelector('.gal-arrow.next');
+      const atual = () => Math.round(gal.scrollLeft / gal.clientWidth);
+      const ir = (i) => gal.scrollTo({ left: Math.max(0, Math.min(total - 1, i)) * gal.clientWidth, behavior: 'smooth' });
+      gal.addEventListener('scroll', () => {
+        const i = atual();
+        dots.forEach((d, k) => d.classList.toggle('on', k === i));
+        prev.hidden = i === 0;
+        next.hidden = i === total - 1;
+      }, { passive: true });
+      prev.addEventListener('click', () => ir(atual() - 1));
+      next.addEventListener('click', () => ir(atual() + 1));
+      dots.forEach((d, k) => d.addEventListener('click', () => ir(k)));
+    }
   };
 
   const closeSheet = () => {

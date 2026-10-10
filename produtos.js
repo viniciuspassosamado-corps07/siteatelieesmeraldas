@@ -78,6 +78,8 @@
     }
   };
 
-  window.Loja = { produtos: [], esc, precoHtml };
+  const fotoUrl = (caminho) => `${SUPABASE_URL}/storage/v1/object/public/produtos/${caminho}`;
+  const fotoReserva = (caminho) => 'img/' + String(caminho).split('/').pop();
+  window.Loja = { produtos: [], esc, precoHtml, fotoUrl, fotoReserva };
   window.Loja.pronto = carregar();
 })();
