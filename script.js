@@ -182,7 +182,10 @@ Loja.pronto.then(() => {
   const hero = document.getElementById('hero');
   if (!hero || matchMedia('(prefers-reduced-motion: reduce)').matches) return;
   const bar = hero.querySelector('.hero-progress i');
-  const A = 13200, B = 25700;   // a troca começa um pouco antes do fim, com o conteúdo ainda visível
+  const A = 13200;
+  // a parte das ofertas dura 5s por tomada (+0,7s de folga); o número de tomadas vem do banco, então é lido a cada volta
+  const tomadas = () => document.querySelectorAll('#dealsBanner .ob-slide').length;
+  const duracaoB = () => (tomadas() || 5) * 5000 + 700;
   const c = hero.classList;
   const wipe = () => {
     c.remove('wipe'); void hero.offsetWidth; c.add('wipe');
@@ -193,11 +196,13 @@ Loja.pronto.then(() => {
     c.remove('b'); c.add('a', 'run-a');
     setTimeout(() => c.remove('run-b'), 1300);   // só reinicia a parte antiga depois que ela sumiu
     bar.style.animation = 'none'; void bar.offsetWidth; bar.style.animation = '';
+    bar.style.animationDuration = (A + duracaoB()) / 1000 + 's';
     setTimeout(() => {
+      if (!tomadas()) return loop(true);   // banner sem produtos: a cena do ateliê continua sozinha
       wipe(); c.remove('a'); c.add('b', 'run-b');
       setTimeout(() => c.remove('run-a'), 1300);
+      setTimeout(loop, duracaoB());
     }, A);
-    setTimeout(loop, A + B);
   };
   loop(true);
 })();

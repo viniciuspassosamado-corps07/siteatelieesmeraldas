@@ -202,6 +202,12 @@ ul{list-style:none}
 .girando{width:26px;height:26px;border-radius:50%;border:3px solid #d1d1d6;border-top-color:var(--blue);animation:gira .8s linear infinite}
 @keyframes gira{to{transform:rotate(360deg)}}
 
+/* banner */
+.tag-banner{background:#eee9ff;color:#5b3fd1}
+.linha-interruptor + [data-bloco-banner]{margin-top:2px}
+[data-bloco-banner] .campo{margin-top:14px}
+.fotos-banner .foto-img{background:repeating-conic-gradient(#e9e9ee 0 25%,#f7f7fa 0 50%) 0 0/16px 16px}   /* xadrez: deixa ver a transparência */
+
 .apagar{display:block;width:100%;padding:14px;margin-top:10px;border-radius:14px;color:#d92d20;font-size:16px;font-weight:600;transition:background .2s}
 .apagar:hover{background:#fff0f0}
 

@@ -3,7 +3,8 @@
 (() => {
   const SUPABASE_URL = 'https://vcunrbzfinnnyjviwlag.supabase.co';
   const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZjdW5yYnpmaW5ubnlqdml3bGFnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTE2NjAxOTYsImV4cCI6MjEwNzIzNjE5Nn0.t0NRuguarsR5nv6LjtndZj-0JnY0gB-w5ogyBXUsDDo';
-  const MAX_OFERTAS = 5;   // o banner do topo foi desenhado para 5 tomadas
+  const MAX_BANNER = 5;       // o banner do topo foi desenhado para 5 tomadas (mesmo limite de MAX_BANNER em admin/config.js)
+  const MAX_CARROSSEL = 8;    // teto do carrossel "Ofertas imperdíveis" (mesmo limite em admin/config.js)
 
   const CORES = {
     esmeralda: { c: '#12b886', d: '#03130e' },
@@ -21,9 +22,9 @@
   const cor = (p) => CORES[p.cor] || CORES.esmeralda;
 
   /* a foto vem do bucket "produtos"; se ainda não estiver lá, cai na cópia local de img/ */
-  const foto = (p) => (p.fotos?.[0] ? `${SUPABASE_URL}/storage/v1/object/public/produtos/${p.fotos[0]}` : '');
-  const fotoLocal = (p) => 'img/' + (p.fotos?.[0] || '').split('/').pop();
-  const img = (p, attrs = '') => `<img ${attrs} src="${esc(foto(p))}" data-fallback="${esc(fotoLocal(p))}" alt="${esc(p.nome)}">`;
+  const urlFoto = (caminho) => (caminho ? `${SUPABASE_URL}/storage/v1/object/public/produtos/${caminho}` : '');
+  const fotoLocal = (caminho) => 'img/' + (caminho || '').split('/').pop();
+  const img = (p, attrs = '', caminho = p.fotos?.[0]) => `<img ${attrs} src="${esc(urlFoto(caminho))}" data-fallback="${esc(fotoLocal(caminho))}" alt="${esc(p.nome)}">`;
   document.addEventListener('error', (e) => {
     const el = e.target;
     if (el.tagName === 'IMG' && el.dataset.fallback && !el.dataset.tried) { el.dataset.tried = '1'; el.src = el.dataset.fallback; }
@@ -33,28 +34,42 @@
 
   const slide = (p) => `<article class="slide" data-id="${esc(p.id)}" data-tint="${cor(p).c}"><div class="tile"><span class="off">-${desconto(p)}%</span>${img(p)}</div><div class="info"><p class="kicker">${esc(p.detalhes)}</p><h3>${esc(p.nome)}</h3><div class="prices"><strong>${brl(p.preco)}</strong><s>${brl(p.preco_original)}</s></div><a href="#" class="buy">Aproveitar oferta</a></div></article>`;
 
+  /* uma tomada do banner: kicker, nome, preço e (se for oferta válida) o preço original riscado;
+     a foto é a do banner, se o dono enviou uma, senão a primeira foto do produto */
   const bannerSlide = (p, i) => {
     const [primeira, ...resto] = p.nome.split(' ');
-    return `<div class="ob-slide" style="--c:${cor(p).c};--d:${cor(p).d};--dl:${i * 5}s"><div class="ob-text" aria-hidden="true"><span class="ln k">Oferta imperdível · -${desconto(p)}%</span><span class="ln ob-name">${esc(primeira)}<br>${esc(resto.join(' '))}</span><span class="ln ob-price"><strong>${brl(p.preco)}</strong><s>${brl(p.preco_original)}</s></span></div>${img(p, 'class="ob-gem"').replace('alt="' + esc(p.nome) + '"', 'alt=""')}</div>`;
+    const kicker = p.emOferta ? `Oferta imperdível · -${desconto(p)}%` : 'Destaque';
+    const preco = p.preco == null ? '' : `<strong>${brl(p.preco)}</strong>${p.emOferta ? `<s>${brl(p.preco_original)}</s>` : ''}`;
+    const foto = img(p, 'class="ob-gem"', p.foto_banner || p.fotos?.[0]).replace('alt="' + esc(p.nome) + '"', 'alt=""');
+    return `<div class="ob-slide" style="--c:${cor(p).c};--d:${cor(p).d};--dl:${i * 5}s"><div class="ob-text" aria-hidden="true"><span class="ln k">${kicker}</span><span class="ln ob-name">${esc(primeira)}<br>${esc(resto.join(' '))}</span><span class="ln ob-price">${preco}</span></div>${foto}</div>`;
+  };
+
+  /* decide o que vai em cada lugar (função pura, sem tocar na página) */
+  const selecionar = (lista) => {
+    // carrossel: só ofertas válidas, no máximo MAX_CARROSSEL; as que passam do teto ficam só na fileira, com a etiqueta
+    const carrossel = lista.filter((p) => p.emOferta).slice(0, MAX_CARROSSEL);
+    // banner: produtos marcados (ativos e com estoque, na ordem de exibição); sem nenhum, usa as ofertas
+    const marcados = lista.filter((p) => p.no_banner && !p.vendido);
+    const banner = (marcados.length ? marcados : lista.filter((p) => p.emOferta)).slice(0, MAX_BANNER);
+    const fileiras = lista.filter((p) => !carrossel.includes(p));
+    return { carrossel, banner, fileiras };
   };
 
   const render = (lista) => {
-    // as primeiras ofertas vão para o banner e o carrossel; as que passam do limite ficam só na fileira, com a etiqueta
-    const ofertas = lista.filter((p) => p.emOferta).slice(0, MAX_OFERTAS);
-    const normais = lista.filter((p) => !ofertas.includes(p));
+    const { carrossel, banner, fileiras } = selecionar(lista);
     const preencher = (id, html) => { const el = document.getElementById(id); if (el) el.innerHTML = html; };
 
-    preencher('rowPedras', normais.filter((p) => p.categoria === 'pedra').map(card).join(''));
-    preencher('rowJoias', normais.filter((p) => p.categoria === 'joia').map(card).join(''));
-    preencher('offerSlides', ofertas.map(slide).join(''));
-    preencher('offerSegs', ofertas.map((_, i) => `<button class="seg" aria-label="Oferta ${i + 1}"><i></i></button>`).join(''));
-    preencher('dealsBanner', ofertas.map(bannerSlide).join(''));
+    preencher('rowPedras', fileiras.filter((p) => p.categoria === 'pedra').map(card).join(''));
+    preencher('rowJoias', fileiras.filter((p) => p.categoria === 'joia').map(card).join(''));
+    preencher('offerSlides', carrossel.map(slide).join(''));
+    preencher('offerSegs', carrossel.map((_, i) => `<button class="seg" aria-label="Oferta ${i + 1}"><i></i></button>`).join(''));
+    preencher('dealsBanner', banner.map(bannerSlide).join(''));
     const secao = document.getElementById('ofertas');
-    if (secao) secao.hidden = ofertas.length === 0;
+    if (secao) secao.hidden = carrossel.length === 0;
   };
 
   const carregar = async () => {
-    const campos = 'id,nome,categoria,titulo,descricao,detalhes,cor,preco,preco_original,oferta,oferta_ate,fotos,estoque,ordem';
+    const campos = 'id,nome,categoria,titulo,descricao,detalhes,cor,preco,preco_original,oferta,oferta_ate,fotos,estoque,ordem,no_banner,foto_banner';
     try {
       const res = await fetch(`${SUPABASE_URL}/rest/v1/produtos?select=${campos}&ativo=eq.true&order=ordem.asc,criado_em.asc`, {
         headers: { apikey: SUPABASE_ANON_KEY, Authorization: `Bearer ${SUPABASE_ANON_KEY}` }
@@ -65,7 +80,7 @@
         const preco = p.preco == null ? null : Number(p.preco);
         const original = p.preco_original == null ? null : Number(p.preco_original);
         const vendido = Number(p.estoque) === 0;
-        // produto vendido não é promovido: sai do banner e do carrossel e fica na fileira, com a etiqueta
+        // produto vendido não é promovido: sai do carrossel (e do banner, ver selecionar) e fica na fileira, com a etiqueta
         const valida = p.oferta && preco != null && original > preco && (!p.oferta_ate || new Date(p.oferta_ate) > agora) && !vendido;
         return { ...p, preco, preco_original: original, vendido, emOferta: Boolean(valida) };
       });
@@ -80,6 +95,6 @@
 
   const fotoUrl = (caminho) => `${SUPABASE_URL}/storage/v1/object/public/produtos/${caminho}`;
   const fotoReserva = (caminho) => 'img/' + String(caminho).split('/').pop();
-  window.Loja = { produtos: [], esc, precoHtml, fotoUrl, fotoReserva };
+  window.Loja = { produtos: [], esc, precoHtml, fotoUrl, fotoReserva, selecionar };
   window.Loja.pronto = carregar();
 })();

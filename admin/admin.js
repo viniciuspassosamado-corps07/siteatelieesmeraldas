@@ -71,7 +71,7 @@ const desenhar = () => {
   el.vazio.textContent = total ? 'Nenhum produto neste filtro.' : 'Nenhum produto cadastrado ainda.';
 };
 
-const CAMPOS = 'id,nome,categoria,titulo,descricao,detalhes,cor,preco,preco_original,oferta,oferta_ate,fotos,estoque,ativo,ordem';
+const CAMPOS = 'id,nome,categoria,titulo,descricao,detalhes,cor,preco,preco_original,oferta,oferta_ate,fotos,estoque,ativo,ordem,no_banner,foto_banner';
 
 const carregar = async () => {
   const { data, error } = await sb.from('produtos').select(CAMPOS).order('categoria', { ascending: false }).order('ordem', { ascending: true }).order('criado_em', { ascending: true });

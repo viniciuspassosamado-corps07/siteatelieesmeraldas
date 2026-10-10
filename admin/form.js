@@ -2,7 +2,7 @@
    e só vão para o bucket quando o dono toca em Salvar. */
 import { comprimirImagem } from '../comprimir-imagem.js';
 import { esc, caminhoThumb, caminhoDeExemplo, imgDoCaminho, ofertaValida } from './lista.js';
-import { MAX_OFERTAS_BANNER } from './config.js';
+import { MAX_BANNER, MAX_CARROSSEL } from './config.js';
 import { validarProduto, textoPreco, calcularDesconto, lerPreco, dataLocal } from './validacao.js';
 
 const MAX_FOTOS = 8;
@@ -96,18 +96,34 @@ export function criarFormulario({ sb, bucket, obterProdutos, aoSalvar, aoApagar,
 
     <section class="grupo">
       <div class="linha-interruptor">
-        <div><strong>Adicionar como oferta</strong><span>Aparece no banner e no carrossel de ofertas</span></div>
+        <div><strong>Adicionar como oferta</strong><span>Aparece no carrossel de ofertas</span></div>
         <button type="button" class="switch" role="switch" data-oferta aria-label="Adicionar como oferta" aria-checked="${e.oferta}"><i></i></button>
       </div>
       <div data-bloco-normal ${e.oferta ? 'hidden' : ''}>
         ${campoHtml('preco', 'Preço (R$) *', e.valores.preco, 'inputmode="decimal" placeholder="0,00"')}
       </div>
       <div data-bloco-oferta ${e.oferta ? '' : 'hidden'}>
-        <p class="aviso-oferta" data-aviso-oferta role="status" hidden>O banner mostra no máximo ${MAX_OFERTAS_BANNER} ofertas. Esta aparecerá só na fileira.</p>
+        <p class="aviso-oferta" data-aviso-oferta role="status" hidden>O carrossel mostra no máximo ${MAX_CARROSSEL} ofertas. Esta aparecerá só na fileira.</p>
         ${campoHtml('precoOferta', 'Preço da oferta (R$) *', e.valores.precoOferta, 'inputmode="decimal" placeholder="0,00"')}
         ${campoHtml('precoOriginal', 'Preço original (R$) *', e.valores.precoOriginal, 'inputmode="decimal" placeholder="0,00"')}
         <p class="desconto" data-desconto></p>
         ${campoHtml('termino', 'Término da oferta (opcional)', e.valores.termino, 'type="date"')}
+      </div>
+    </section>
+
+    <section class="grupo">
+      <div class="linha-interruptor">
+        <div><strong>Mostrar no banner</strong><span>Aparece no banner abaixo do menu, com nome e preço</span></div>
+        <button type="button" class="switch" role="switch" data-banner aria-label="Mostrar no banner" aria-checked="${e.noBanner}"><i></i></button>
+      </div>
+      <div data-bloco-banner ${e.noBanner ? '' : 'hidden'}>
+        <p class="aviso-oferta" data-aviso-banner role="status" hidden>O banner mostra no máximo ${MAX_BANNER} produtos. Este não aparecerá nele.</p>
+        <div class="campo">
+          <span class="rotulo">Foto do banner (opcional)</span>
+          <div class="fotos fotos-banner" data-foto-banner></div>
+          <p class="dica">Use PNG ou WebP com fundo transparente. Se ficar em branco, usa a primeira foto do produto.</p>
+          <input type="file" data-arquivo-banner accept="image/png,image/webp" hidden>
+        </div>
       </div>
     </section>
 
@@ -145,6 +161,10 @@ export function criarFormulario({ sb, bucket, obterProdutos, aoSalvar, aoApagar,
       },
       fotos: (produto?.fotos ?? []).map((caminho, i) => ({ fid: `x${i}`, estado: 'salva', caminho })),
       fotosOriginais: [...(produto?.fotos ?? [])],
+      noBanner: Boolean(produto?.no_banner),
+      /* foto do banner: null (usa a primeira foto), { estado: 'salva', caminho }, 'comprimindo' ou 'pronta' (ainda não enviada) */
+      fotoBanner: produto?.foto_banner ? { estado: 'salva', caminho: produto.foto_banner } : null,
+      bannerOriginal: produto?.foto_banner ?? null,
       sujo: false,
       ocupado: false,
       contador: 0
@@ -199,6 +219,45 @@ export function criarFormulario({ sb, bucket, obterProdutos, aoSalvar, aoApagar,
       }
     };
 
+    /* ----- foto do banner (uma só, opcional; sai em WebP e mantém a transparência) ----- */
+    const desenharFotoBanner = () => {
+      const f = e.fotoBanner;
+      if (!f) {
+        $('[data-foto-banner]').innerHTML = '<button type="button" class="foto-add" data-acao="add-foto-banner"><b>+</b>Foto</button>';
+        return;
+      }
+      const imagem = f.estado === 'comprimindo'
+        ? '<span class="girando" aria-label="Comprimindo"></span>'
+        : f.caminho ? imgDoCaminho(f.caminho, '', false) : `<img src="${esc(f.url)}" alt="">`;
+      $('[data-foto-banner]').innerHTML = `<div class="foto">
+        <div class="foto-img">${imagem}</div>
+        <div class="foto-acoes">
+          <button type="button" data-acao="add-foto-banner">Trocar</button>
+          <button type="button" data-acao="remover-foto-banner">Remover</button>
+        </div>
+        ${f.resumo ? `<span class="foto-info">${esc(f.resumo)}</span>` : ''}
+      </div>`;
+    };
+
+    const escolherFotoBanner = async (arquivo) => {
+      if (!arquivo) return;
+      if (e.fotoBanner?.url) URL.revokeObjectURL(e.fotoBanner.url);
+      const f = { estado: 'comprimindo' };
+      e.fotoBanner = f;
+      e.sujo = true;
+      desenharFotoBanner();
+      try {
+        const r = await comprimirImagem(arquivo, { maxLado: 900, thumbLado: 300 });
+        if (aberto !== e || e.fotoBanner !== f) return;
+        Object.assign(f, { estado: 'pronta', full: r.full, extFull: r.extFull, url: URL.createObjectURL(r.thumb), resumo: r.resumo });
+      } catch (err) {
+        if (aberto !== e || e.fotoBanner !== f) return;
+        e.fotoBanner = null;
+        aviso(`${arquivo.name}: ${err instanceof Error ? err.message : 'não foi possível preparar a foto.'}`);
+      }
+      desenharFotoBanner();
+    };
+
     /* ----- oferta e desconto ----- */
     const atualizarDesconto = () => {
       const oferta = lerPreco(campo('precoOferta').value);
@@ -207,14 +266,20 @@ export function criarFormulario({ sb, bucket, obterProdutos, aoSalvar, aoApagar,
       $('[data-desconto]').textContent = d == null ? 'Desconto: preencha os dois preços' : `Desconto calculado: -${d}%`;
     };
 
-    /* o banner pega as primeiras ofertas, na ordem de exibição; avisa quando esta ficaria depois do limite */
-    const atualizarAvisoOferta = () => {
-      const todos = obterProdutos();
+    /* o carrossel pega as primeiras ofertas e o banner os primeiros marcados, na ordem de exibição;
+       avisa quando este produto ficaria depois do limite */
+    const posicaoNaFila = (conta) => {
       const ordem = e.produto ? Number(e.produto.ordem) || 0 : proximaOrdem();
-      const semEstoque = campo('estoque').value.trim() !== '' && Number(campo('estoque').value) === 0;
-      const antes = todos.filter((x) => x.id !== e.id && x.ativo && Number(x.estoque) > 0 && ofertaValida(x) && (Number(x.ordem) || 0) <= ordem).length;
-      $('[data-aviso-oferta]').hidden = !(e.oferta && e.ativo && !semEstoque && antes >= MAX_OFERTAS_BANNER);
+      return obterProdutos().filter((x) => x.id !== e.id && x.ativo && Number(x.estoque) > 0 && conta(x) && (Number(x.ordem) || 0) <= ordem).length;
     };
+    const semEstoque = () => campo('estoque').value.trim() !== '' && Number(campo('estoque').value) === 0;
+    const atualizarAvisoOferta = () => {
+      $('[data-aviso-oferta]').hidden = !(e.oferta && e.ativo && !semEstoque() && posicaoNaFila(ofertaValida) >= MAX_CARROSSEL);
+    };
+    const atualizarAvisoBanner = () => {
+      $('[data-aviso-banner]').hidden = !(e.noBanner && e.ativo && !semEstoque() && posicaoNaFila((x) => x.no_banner) >= MAX_BANNER);
+    };
+    const atualizarAvisos = () => { atualizarAvisoOferta(); atualizarAvisoBanner(); };
 
     const alternarOferta = () => {
       if (!e.oferta) {
@@ -228,7 +293,7 @@ export function criarFormulario({ sb, bucket, obterProdutos, aoSalvar, aoApagar,
       $('[data-bloco-oferta]').hidden = !e.oferta;
       limparErros();
       atualizarDesconto();
-      atualizarAvisoOferta();
+      atualizarAvisos();
     };
 
     /* ----- erros ----- */
@@ -262,6 +327,7 @@ export function criarFormulario({ sb, bucket, obterProdutos, aoSalvar, aoApagar,
       document.removeEventListener('keydown', aoTeclar);
       document.documentElement.style.overflow = '';
       e.fotos.forEach((f) => f.url && URL.revokeObjectURL(f.url));
+      if (e.fotoBanner?.url) URL.revokeObjectURL(e.fotoBanner.url);
       aberto = null;
       raiz.querySelector('.fundo').classList.remove('on');
       form.classList.remove('on');
@@ -298,7 +364,7 @@ export function criarFormulario({ sb, bucket, obterProdutos, aoSalvar, aoApagar,
       limparErros();
       const { erros, valores } = validarProduto(dados());
       if (!valores) return mostrarErros(erros);
-      if (e.fotos.some((f) => f.estado === 'comprimindo')) return erroGeral('Aguarde as fotos terminarem de ser preparadas.');
+      if (e.fotos.some((f) => f.estado === 'comprimindo') || e.fotoBanner?.estado === 'comprimindo') return erroGeral('Aguarde as fotos terminarem de ser preparadas.');
 
       ocupar(true, 'Salvando…');
       const enviados = [];
@@ -318,6 +384,17 @@ export function criarFormulario({ sb, bucket, obterProdutos, aoSalvar, aoApagar,
         }
         const fotos = e.fotos.map((f) => f.caminho);
 
+        // foto do banner: só tem uma versão (sem miniatura)
+        const fb = e.fotoBanner;
+        if (fb && !fb.caminho) {
+          const caminho = `${e.id}/banner-${Date.now()}.${fb.extFull}`;
+          const { error } = await bucketAtual.upload(caminho, fb.full, { contentType: fb.full.type, cacheControl: '31536000' });
+          if (error) throw error;
+          enviados.push(caminho);
+          fb.caminho = caminho;
+        }
+        const fotoBanner = fb?.caminho ?? null;
+
         const linha = {
           ...valores,
           categoria: e.categoria,
@@ -326,7 +403,9 @@ export function criarFormulario({ sb, bucket, obterProdutos, aoSalvar, aoApagar,
           detalhes: nulo(campo('detalhes').value),
           cor: e.cor,
           ativo: e.ativo,
-          fotos
+          fotos,
+          no_banner: e.noBanner,
+          foto_banner: fotoBanner
         };
 
         let consulta;
@@ -340,6 +419,7 @@ export function criarFormulario({ sb, bucket, obterProdutos, aoSalvar, aoApagar,
 
         const removidas = e.fotosOriginais.filter((c) => !fotos.includes(c) && !caminhoDeExemplo(c));
         if (removidas.length) await bucketAtual.remove(removidas.flatMap((c) => [c, caminhoThumb(c)]));
+        if (e.bannerOriginal && e.bannerOriginal !== fotoBanner && !caminhoDeExemplo(e.bannerOriginal)) await bucketAtual.remove([e.bannerOriginal]);
 
         aoSalvar(data, !e.produto);
         e.sujo = false;
@@ -348,6 +428,7 @@ export function criarFormulario({ sb, bucket, obterProdutos, aoSalvar, aoApagar,
         console.warn('Falha ao salvar o produto:', err?.code ?? err?.name ?? 'erro');
         if (enviados.length) await storage().remove(enviados).catch(() => {});
         e.fotos.forEach((f) => { if (f.full) delete f.caminho; });   // as novas voltam a "pendentes" para tentar de novo
+        if (e.fotoBanner?.full) delete e.fotoBanner.caminho;
         ocupar(false);
         erroGeral(err?.code === '42501' ? 'Sem permissão para salvar. Entre de novo no painel.' : 'Não foi possível salvar. Confira a conexão e tente de novo.');
       }
@@ -390,7 +471,7 @@ export function criarFormulario({ sb, bucket, obterProdutos, aoSalvar, aoApagar,
         if (msg) msg.hidden = true;
       }
       if (alvo.id === 'f-precoOferta' || alvo.id === 'f-precoOriginal') atualizarDesconto();
-      if (alvo.id === 'f-estoque') atualizarAvisoOferta();
+      if (alvo.id === 'f-estoque') atualizarAvisos();
     });
     form.addEventListener('click', (ev) => {
       const alvo = ev.target;
@@ -405,17 +486,27 @@ export function criarFormulario({ sb, bucket, obterProdutos, aoSalvar, aoApagar,
       } else if (acao === 'principal') {
         const i = e.fotos.findIndex((f) => f.fid === fid);
         if (i > 0) { e.fotos.unshift(...e.fotos.splice(i, 1)); e.sujo = true; desenharFotos(); }
+      } else if (acao === 'add-foto-banner') { $('[data-arquivo-banner]').value = ''; $('[data-arquivo-banner]').click(); }
+      else if (acao === 'remover-foto-banner') {
+        if (e.fotoBanner?.url) URL.revokeObjectURL(e.fotoBanner.url);
+        e.fotoBanner = null; e.sujo = true; desenharFotoBanner();
       } else if (alvo.closest('[data-oferta]')) { alternarOferta(); e.sujo = true; }
-      else if (alvo.closest('[data-ativo]')) {
+      else if (alvo.closest('[data-banner]')) {
+        e.noBanner = !e.noBanner;
+        $('[data-banner]').setAttribute('aria-checked', e.noBanner);
+        $('[data-bloco-banner]').hidden = !e.noBanner;
+        e.sujo = true;
+        atualizarAvisoBanner();
+      } else if (alvo.closest('[data-ativo]')) {
         e.ativo = !e.ativo;
         $('[data-ativo]').setAttribute('aria-checked', e.ativo);
         e.sujo = true;
-        atualizarAvisoOferta();
+        atualizarAvisos();
       } else if (alvo.closest('[data-categoria] button')) {
         e.categoria = alvo.closest('button').dataset.valor;
         raiz.querySelectorAll('[data-categoria] button').forEach((b) => b.setAttribute('aria-checked', b.dataset.valor === e.categoria));
         e.sujo = true;
-        atualizarAvisoOferta();
+        atualizarAvisos();
       } else if (alvo.closest('[data-cores] button')) {
         const valor = alvo.closest('button').dataset.valor;
         e.cor = e.cor === valor ? null : valor;   // tocar de novo na cor escolhida limpa a escolha
@@ -424,10 +515,12 @@ export function criarFormulario({ sb, bucket, obterProdutos, aoSalvar, aoApagar,
       }
     });
     $('[data-arquivo]').addEventListener('change', (ev) => adicionarFotos(ev.target.files));
+    $('[data-arquivo-banner]').addEventListener('change', (ev) => escolherFotoBanner(ev.target.files[0]));
 
     desenharFotos();
+    desenharFotoBanner();
     atualizarDesconto();
-    atualizarAvisoOferta();
+    atualizarAvisos();
     requestAnimationFrame(() => {
       raiz.querySelector('.fundo').classList.add('on');
       form.classList.add('on');

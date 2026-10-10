@@ -13,15 +13,16 @@ const urlBucket = (caminho) => `${SUPABASE_URL}/storage/v1/object/public/${BUCKE
 const urlLocal = (caminho) => '../img/' + caminho.split('/').pop();
 
 /* endereços a tentar, em ordem: miniatura, foto inteira, cópia local de img/ */
-export const fontesDoCaminho = (caminho) => {
-  const fontes = caminhoDeExemplo(caminho) ? [] : [urlBucket(caminhoThumb(caminho))];
+export const fontesDoCaminho = (caminho, comMiniatura = true) => {
+  const fontes = comMiniatura && !caminhoDeExemplo(caminho) ? [urlBucket(caminhoThumb(caminho))] : [];
   fontes.push(urlBucket(caminho), urlLocal(caminho));
   return fontes;
 };
 
-/* <img> que, se a primeira fonte falhar, tenta as outras (tratado em admin.js) */
-export const imgDoCaminho = (caminho, alt = '') => {
-  const [primeira, ...reserva] = fontesDoCaminho(caminho);
+/* <img> que, se a primeira fonte falhar, tenta as outras (tratado em admin.js);
+   a foto do banner não tem miniatura, então comMiniatura = false */
+export const imgDoCaminho = (caminho, alt = '', comMiniatura = true) => {
+  const [primeira, ...reserva] = fontesDoCaminho(caminho, comMiniatura);
   return `<img src="${esc(primeira)}" data-reserva="${esc(reserva.join('|'))}" alt="${esc(alt)}" loading="lazy">`;
 };
 
@@ -42,6 +43,7 @@ export const linhaProduto = (p) => {
   const tags = [
     `<span class="tag">${p.categoria === 'joia' ? 'Joia' : 'Pedra'}</span>`,
     ofertaValida(p) ? `<span class="tag tag-oferta">Oferta -${desconto(p)}%</span>` : '',
+    p.no_banner ? '<span class="tag tag-banner">Banner</span>' : '',
     vendido ? '<span class="tag tag-vendido">Vendido</span>' : '',
     ehExemplo(p) ? '<span class="tag tag-exemplo">Exemplo</span>' : '',
     p.ativo ? '' : '<span class="tag tag-escondido">Escondido</span>'
