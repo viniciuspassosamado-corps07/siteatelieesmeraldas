@@ -71,48 +71,8 @@
     </div>
    </div>
 
-   <div class="part part-deals">
-    <div class="ob-slide" style="--c:#12b886;--d:#03130e;--dl:0s">
-      <div class="ob-text" aria-hidden="true">
-        <span class="ln k">Oferta imperdível · -16%</span>
-        <span class="ln ob-name">Esmeralda<br>Colombiana</span>
-        <span class="ln ob-price"><strong>R$ 15.900</strong><s>R$ 18.900</s></span>
-      </div>
-      <img class="ob-gem" src="img/offer-esmeralda.png" alt="">
-    </div>
-    <div class="ob-slide" style="--c:#2f5df0;--d:#060d2e;--dl:5s">
-      <div class="ob-text" aria-hidden="true">
-        <span class="ln k">Oferta imperdível · -12%</span>
-        <span class="ln ob-name">Colar<br>Safira Real</span>
-        <span class="ln ob-price"><strong>R$ 12.500</strong><s>R$ 14.200</s></span>
-      </div>
-      <img class="ob-gem" src="img/offer-colar.png" alt="">
-    </div>
-    <div class="ob-slide" style="--c:#e11d48;--d:#2a050f;--dl:10s">
-      <div class="ob-text" aria-hidden="true">
-        <span class="ln k">Oferta imperdível · -20%</span>
-        <span class="ln ob-name">Brincos<br>Rubi Imperial</span>
-        <span class="ln ob-price"><strong>R$ 18.000</strong><s>R$ 22.500</s></span>
-      </div>
-      <img class="ob-gem" src="img/offer-brincos.png" alt="">
-    </div>
-    <div class="ob-slide" style="--c:#38a8e0;--d:#06202e;--dl:15s">
-      <div class="ob-text" aria-hidden="true">
-        <span class="ln k">Oferta imperdível · -15%</span>
-        <span class="ln ob-name">Pulseira<br>Riviera</span>
-        <span class="ln ob-price"><strong>R$ 27.200</strong><s>R$ 32.000</s></span>
-      </div>
-      <img class="ob-gem" src="img/offer-pulseira.png" alt="">
-    </div>
-    <div class="ob-slide" style="--c:#9d4edd;--d:#1a0830;--dl:20s">
-      <div class="ob-text" aria-hidden="true">
-        <span class="ln k">Oferta imperdível · -10%</span>
-        <span class="ln ob-name">Pingente<br>Ametista</span>
-        <span class="ln ob-price"><strong>R$ 3.060</strong><s>R$ 3.400</s></span>
-      </div>
-      <img class="ob-gem" src="img/offer-pingente.png" alt="">
-    </div>
-   </div>
+   <!-- as tomadas de oferta são montadas por produtos.js a partir do banco -->
+   <div class="part part-deals" id="dealsBanner"></div>
 
     <div class="hero-wipe"></div>
     <div class="hero-vignette"></div>
@@ -149,26 +109,12 @@
       <img class="fl fl-2" src="img/ametista-float.png" alt="">
       <img class="fl fl-3" src="img/topazio-float.png" alt="">
     </div>
-    <div class="row">
-      <article class="card"><div class="ph"><img src="img/esmeralda.jpg" alt="Esmeralda"></div><h3>Esmeralda</h3><p>Placeholder · 0,00 ct</p><div class="card-foot"><span>R$ 0.000</span><button>Ver</button></div></article>
-      <article class="card"><div class="ph"><img src="img/safira.jpg" alt="Safira"></div><h3>Safira</h3><p>Placeholder · 0,00 ct</p><div class="card-foot"><span>R$ 0.000</span><button>Ver</button></div></article>
-      <article class="card"><div class="ph"><img src="img/rubi.jpg" alt="Rubi"></div><h3>Rubi</h3><p>Placeholder · 0,00 ct</p><div class="card-foot"><span>R$ 0.000</span><button>Ver</button></div></article>
-      <article class="card"><div class="ph"><img src="img/diamante.jpg" alt="Diamante"></div><h3>Diamante</h3><p>Placeholder · 0,00 ct</p><div class="card-foot"><span>R$ 0.000</span><button>Ver</button></div></article>
-      <article class="card"><div class="ph"><img src="img/ametista.jpg" alt="Ametista"></div><h3>Ametista</h3><p>Placeholder · 0,00 ct</p><div class="card-foot"><span>R$ 0.000</span><button>Ver</button></div></article>
-      <article class="card"><div class="ph"><img src="img/topazio.jpg" alt="Topázio"></div><h3>Topázio</h3><p>Placeholder · 0,00 ct</p><div class="card-foot"><span>R$ 0.000</span><button>Ver</button></div></article>
-    </div>
+    <div class="row" id="rowPedras"></div>
   </main>
 
   <section class="jewels">
     <h2 class="stones-title">Joias<br><span>exclusivas</span></h2>
-    <div class="row">
-      <article class="card"><div class="ph"><img src="img/anel.jpg" alt="Anel"></div><h3>Anel</h3><p>Placeholder · Esmeralda</p><div class="card-foot"><span>R$ 0.000</span><button>Ver</button></div></article>
-      <article class="card"><div class="ph"><img src="img/colar.jpg" alt="Colar"></div><h3>Colar</h3><p>Placeholder · Safira</p><div class="card-foot"><span>R$ 0.000</span><button>Ver</button></div></article>
-      <article class="card"><div class="ph"><img src="img/brincos.jpg" alt="Brincos"></div><h3>Brincos</h3><p>Placeholder · Rubi</p><div class="card-foot"><span>R$ 0.000</span><button>Ver</button></div></article>
-      <article class="card"><div class="ph"><img src="img/pulseira.jpg" alt="Pulseira"></div><h3>Pulseira</h3><p>Placeholder · Diamante</p><div class="card-foot"><span>R$ 0.000</span><button>Ver</button></div></article>
-      <article class="card"><div class="ph"><img src="img/pingente.jpg" alt="Pingente"></div><h3>Pingente</h3><p>Placeholder · Ametista</p><div class="card-foot"><span>R$ 0.000</span><button>Ver</button></div></article>
-      <article class="card"><div class="ph"><img src="img/broche.jpg" alt="Broche"></div><h3>Broche</h3><p>Placeholder · Topázio</p><div class="card-foot"><span>R$ 0.000</span><button>Ver</button></div></article>
-    </div>
+    <div class="row" id="rowJoias"></div>
   </section>
 
   <section class="offers" id="ofertas">
@@ -178,63 +124,12 @@
 
     <div class="offers-card" id="offers" aria-roledescription="carrossel">
       <div class="offers-fx" id="offersFx" aria-hidden="true"></div>
-      <div class="slides">
-        <article class="slide active" data-tint="#12b886">
-          <div class="tile"><span class="off">-16%</span><img src="img/offer-esmeralda.png" alt="Esmeralda colombiana"></div>
-          <div class="info">
-            <p class="kicker">Esmeralda · 2,41 ct</p>
-            <h3>Esmeralda Colombiana</h3>
-            <div class="prices"><strong>R$ 15.900</strong><s>R$ 18.900</s></div>
-            <a href="#" class="buy">Aproveitar oferta</a>
-          </div>
-        </article>
-        <article class="slide" data-tint="#2f5df0">
-          <div class="tile"><span class="off">-12%</span><img src="img/offer-colar.png" alt="Colar com safira"></div>
-          <div class="info">
-            <p class="kicker">Ouro branco · Safira 3,10 ct</p>
-            <h3>Colar Safira Real</h3>
-            <div class="prices"><strong>R$ 12.500</strong><s>R$ 14.200</s></div>
-            <a href="#" class="buy">Aproveitar oferta</a>
-          </div>
-        </article>
-        <article class="slide" data-tint="#e11d48">
-          <div class="tile"><span class="off">-20%</span><img src="img/offer-brincos.png" alt="Brincos de rubi"></div>
-          <div class="info">
-            <p class="kicker">Ouro 18k · Rubis 1,85 ct</p>
-            <h3>Brincos Rubi Imperial</h3>
-            <div class="prices"><strong>R$ 18.000</strong><s>R$ 22.500</s></div>
-            <a href="#" class="buy">Aproveitar oferta</a>
-          </div>
-        </article>
-        <article class="slide" data-tint="#38a8e0">
-          <div class="tile"><span class="off">-15%</span><img src="img/offer-pulseira.png" alt="Pulseira de diamantes"></div>
-          <div class="info">
-            <p class="kicker">Ouro branco · Diamantes</p>
-            <h3>Pulseira Riviera</h3>
-            <div class="prices"><strong>R$ 27.200</strong><s>R$ 32.000</s></div>
-            <a href="#" class="buy">Aproveitar oferta</a>
-          </div>
-        </article>
-        <article class="slide" data-tint="#9d4edd">
-          <div class="tile"><span class="off">-10%</span><img src="img/offer-pingente.png" alt="Pingente de ametista"></div>
-          <div class="info">
-            <p class="kicker">Prata 925 · Ametista 5,60 ct</p>
-            <h3>Pingente Ametista</h3>
-            <div class="prices"><strong>R$ 3.060</strong><s>R$ 3.400</s></div>
-            <a href="#" class="buy">Aproveitar oferta</a>
-          </div>
-        </article>
-      </div>
-      <div class="segs" role="tablist" aria-label="Escolher oferta">
-        <button class="seg" aria-label="Oferta 1"><i></i></button>
-        <button class="seg" aria-label="Oferta 2"><i></i></button>
-        <button class="seg" aria-label="Oferta 3"><i></i></button>
-        <button class="seg" aria-label="Oferta 4"><i></i></button>
-        <button class="seg" aria-label="Oferta 5"><i></i></button>
-      </div>
+      <div class="slides" id="offerSlides"></div>
+      <div class="segs" id="offerSegs" role="tablist" aria-label="Escolher oferta"></div>
     </div>
   </section>
 
+  <script src="produtos.js"></script>
   <script src="script.js"></script>
   <script type="module" src="ripple.js"></script>
 </body>
