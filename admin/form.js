@@ -75,7 +75,7 @@ export function criarFormulario({ sb, bucket, obterProdutos, aoSalvar, aoApagar,
     </section>
 
     <section class="grupo">
-      ${campoHtml('nome', 'Nome *', p?.nome ?? '', 'maxlength="130"')}
+      ${campoHtml('nome', 'Nome *', p?.nome ?? '', 'maxlength="120"')}
       <div class="campo">
         <span class="rotulo">Categoria</span>
         <div class="segmentos" data-categoria role="radiogroup" aria-label="Categoria">
@@ -83,9 +83,9 @@ export function criarFormulario({ sb, bucket, obterProdutos, aoSalvar, aoApagar,
           <button type="button" role="radio" data-valor="joia" aria-checked="${e.categoria === 'joia'}">Joia exclusiva</button>
         </div>
       </div>
-      ${campoHtml('titulo', 'Título persuasivo', p?.titulo ?? '', 'placeholder="Ex.: O verde que hipnotiza."')}
-      <div class="campo"><label for="f-descricao">Descrição</label><textarea id="f-descricao" name="descricao" rows="3">${esc(p?.descricao ?? '')}</textarea></div>
-      ${campoHtml('detalhes', 'Detalhes', p?.detalhes ?? '', 'placeholder="Ex.: Esmeralda · 2,41 ct"')}
+      ${campoHtml('titulo', 'Título persuasivo', p?.titulo ?? '', 'maxlength="160" placeholder="Ex.: O verde que hipnotiza."')}
+      <div class="campo"><label for="f-descricao">Descrição</label><textarea id="f-descricao" name="descricao" rows="3" maxlength="2000">${esc(p?.descricao ?? '')}</textarea></div>
+      ${campoHtml('detalhes', 'Detalhes', p?.detalhes ?? '', 'maxlength="160" placeholder="Ex.: Esmeralda · 2,41 ct"')}
       <div class="campo">
         <span class="rotulo">Cor</span>
         <div class="cores" data-cores role="radiogroup" aria-label="Cor">
@@ -345,7 +345,7 @@ export function criarFormulario({ sb, bucket, obterProdutos, aoSalvar, aoApagar,
         e.sujo = false;
         encerrar();
       } catch (err) {
-        console.warn(err);
+        console.warn('Falha ao salvar o produto:', err?.code ?? err?.name ?? 'erro');
         if (enviados.length) await storage().remove(enviados).catch(() => {});
         e.fotos.forEach((f) => { if (f.full) delete f.caminho; });   // as novas voltam a "pendentes" para tentar de novo
         ocupar(false);
@@ -360,7 +360,7 @@ export function criarFormulario({ sb, bucket, obterProdutos, aoSalvar, aoApagar,
       ocupar(true, 'Apagando…');
       const { data, error } = await sb.from('produtos').delete().eq('id', e.id).select('id');
       if (error || !data?.length) {
-        console.warn(error);
+        console.warn('Falha ao apagar o produto:', error?.code ?? 'sem resposta');
         ocupar(false);
         return erroGeral('Não foi possível apagar o produto. Tente de novo.');
       }

@@ -1,7 +1,7 @@
 /* Painel /admin: login (Supabase Auth), lista de produtos e visível/escondido.
    Novo, editar, apagar e fotos ficam em form.js. Quem entra precisa estar na tabela admins;
    as escritas também são barradas pelo RLS no banco. */
-import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/+esm';
+import { createClient } from '/vendor/supabase.js';
 import { SUPABASE_URL, SUPABASE_ANON_KEY, BUCKET } from './config.js';
 import { linhaProduto, ofertaValida } from './lista.js';
 import { criarFormulario } from './form.js';
@@ -74,10 +74,10 @@ const desenhar = () => {
 const CAMPOS = 'id,nome,categoria,titulo,descricao,detalhes,cor,preco,preco_original,oferta,oferta_ate,fotos,estoque,ativo,ordem';
 
 const carregar = async () => {
-  const { data, error } = await sb.from('produtos').select(CAMPOS).order('categoria', { ascending: false }).order('ordem', { ascending: true });
+  const { data, error } = await sb.from('produtos').select(CAMPOS).order('categoria', { ascending: false }).order('ordem', { ascending: true }).order('criado_em', { ascending: true });
   if (error) {
     aviso('Não foi possível carregar os produtos. Atualize a página para tentar de novo.');
-    console.warn(error);
+    console.warn('Falha ao carregar os produtos:', error.code ?? error.name);
     return;
   }
   produtos = data;

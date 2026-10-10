@@ -183,6 +183,8 @@ Loja.pronto.then(() => {
   const norm = (s) => s.toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '');
   const groups = [...document.querySelectorAll('.stones, .jewels')];
 
+  input.form?.addEventListener('submit', (e) => e.preventDefault());   // Enter não recarrega a página (sem onsubmit inline, por causa da CSP)
+
   input.addEventListener('input', () => {
     const q = norm(input.value.trim());
     let total = 0;

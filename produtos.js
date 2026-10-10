@@ -56,7 +56,7 @@
   const carregar = async () => {
     const campos = 'id,nome,categoria,titulo,descricao,detalhes,cor,preco,preco_original,oferta,oferta_ate,fotos,estoque,ordem';
     try {
-      const res = await fetch(`${SUPABASE_URL}/rest/v1/produtos?select=${campos}&ativo=eq.true&order=ordem.asc`, {
+      const res = await fetch(`${SUPABASE_URL}/rest/v1/produtos?select=${campos}&ativo=eq.true&order=ordem.asc,criado_em.asc`, {
         headers: { apikey: SUPABASE_ANON_KEY, Authorization: `Bearer ${SUPABASE_ANON_KEY}` }
       });
       if (!res.ok) throw new Error(`Supabase respondeu ${res.status}`);
