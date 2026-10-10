@@ -1,0 +1,75 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="robots" content="noindex, nofollow">
+  <title>Painel · Ateliê das Esmeraldas</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="admin.css">
+</head>
+<body>
+
+  <header class="bar" id="barra" hidden>
+    <div class="bar-in">
+      <div class="brand">
+        <img src="../img/esmeralda-icon.png" alt="">
+        <span><small>Ateliê das</small>Esmeraldas<em>Painel</em></span>
+      </div>
+      <div class="bar-user">
+        <span id="usuarioEmail"></span>
+        <button type="button" class="pill" id="sair">Sair</button>
+      </div>
+    </div>
+  </header>
+
+  <main class="login-wrap" id="login" hidden>
+    <form class="login" id="loginForm" novalidate>
+      <img class="login-gem" src="../img/esmeralda-icon.png" alt="">
+      <h1>Painel da loja</h1>
+      <p class="login-sub">Entre com o e-mail e a senha do administrador.</p>
+
+      <label for="email">E-mail</label>
+      <input id="email" name="email" type="email" autocomplete="username" inputmode="email" autocapitalize="none" required>
+
+      <label for="senha">Senha</label>
+      <input id="senha" name="senha" type="password" autocomplete="current-password" required>
+
+      <p class="erro" id="loginErro" role="alert" hidden></p>
+      <button type="submit" class="primario" id="loginBtn">Entrar</button>
+    </form>
+  </main>
+
+  <main class="painel" id="painel" hidden>
+    <div class="titulo">
+      <h1>Produtos</h1>
+      <span class="contagem" id="contagem"></span>
+      <button type="button" class="btn-novo" id="novoProduto">+ Novo produto</button>
+    </div>
+
+    <div class="filtros">
+      <div class="busca">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg>
+        <input id="busca" type="search" placeholder="Pesquisar produtos" aria-label="Pesquisar produtos" autocomplete="off">
+      </div>
+      <div class="segmentos" id="segmentos" role="tablist" aria-label="Filtrar produtos">
+        <button type="button" role="tab" data-filtro="todos" aria-selected="true">Todos</button>
+        <button type="button" role="tab" data-filtro="pedra" aria-selected="false">Pedras</button>
+        <button type="button" role="tab" data-filtro="joia" aria-selected="false">Joias</button>
+        <button type="button" role="tab" data-filtro="oferta" aria-selected="false">Ofertas</button>
+        <button type="button" role="tab" data-filtro="escondido" aria-selected="false">Escondidos</button>
+      </div>
+    </div>
+
+    <p class="vazio" id="vazio" hidden></p>
+    <ul class="lista" id="lista"></ul>
+  </main>
+
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+  <noscript><p class="vazio">Ative o JavaScript para usar o painel.</p></noscript>
+  <script type="module" src="admin.js"></script>
+</body>
+</html>

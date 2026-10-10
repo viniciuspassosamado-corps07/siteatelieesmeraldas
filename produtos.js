@@ -29,7 +29,7 @@
     if (el.tagName === 'IMG' && el.dataset.fallback && !el.dataset.tried) { el.dataset.tried = '1'; el.src = el.dataset.fallback; }
   }, true);
 
-  const card = (p) => `<article class="card" data-id="${esc(p.id)}"><div class="ph">${img(p)}</div><h3>${esc(p.nome)}</h3><p>${esc(p.detalhes)}</p><div class="card-foot"><span>${brl(p.preco)}</span><button>Ver</button></div></article>`;
+  const card = (p) => `<article class="card${p.vendido ? ' vendido' : ''}" data-id="${esc(p.id)}"><div class="ph">${img(p)}${p.vendido ? '<span class="sold">Vendido</span>' : p.emOferta ? `<span class="off">-${desconto(p)}%</span>` : ''}</div><h3>${esc(p.nome)}</h3><p>${esc(p.detalhes)}</p><div class="card-foot"><span>${brl(p.preco)}${p.emOferta ? `<s>${brl(p.preco_original)}</s>` : ''}</span><button>Ver</button></div></article>`;
 
   const slide = (p) => `<article class="slide" data-id="${esc(p.id)}" data-tint="${cor(p).c}"><div class="tile"><span class="off">-${desconto(p)}%</span>${img(p)}</div><div class="info"><p class="kicker">${esc(p.detalhes)}</p><h3>${esc(p.nome)}</h3><div class="prices"><strong>${brl(p.preco)}</strong><s>${brl(p.preco_original)}</s></div><a href="#" class="buy">Aproveitar oferta</a></div></article>`;
 
@@ -39,8 +39,9 @@
   };
 
   const render = (lista) => {
+    // as primeiras ofertas vão para o banner e o carrossel; as que passam do limite ficam só na fileira, com a etiqueta
     const ofertas = lista.filter((p) => p.emOferta).slice(0, MAX_OFERTAS);
-    const normais = lista.filter((p) => !p.emOferta);
+    const normais = lista.filter((p) => !ofertas.includes(p));
     const preencher = (id, html) => { const el = document.getElementById(id); if (el) el.innerHTML = html; };
 
     preencher('rowPedras', normais.filter((p) => p.categoria === 'pedra').map(card).join(''));
@@ -53,7 +54,7 @@
   };
 
   const carregar = async () => {
-    const campos = 'id,nome,categoria,titulo,descricao,detalhes,cor,preco,preco_original,oferta,oferta_ate,fotos,ordem';
+    const campos = 'id,nome,categoria,titulo,descricao,detalhes,cor,preco,preco_original,oferta,oferta_ate,fotos,estoque,ordem';
     try {
       const res = await fetch(`${SUPABASE_URL}/rest/v1/produtos?select=${campos}&ativo=eq.true&order=ordem.asc`, {
         headers: { apikey: SUPABASE_ANON_KEY, Authorization: `Bearer ${SUPABASE_ANON_KEY}` }
@@ -63,8 +64,10 @@
       const lista = (await res.json()).map((p) => {
         const preco = p.preco == null ? null : Number(p.preco);
         const original = p.preco_original == null ? null : Number(p.preco_original);
-        const valida = p.oferta && preco != null && original > preco && (!p.oferta_ate || new Date(p.oferta_ate) > agora);
-        return { ...p, preco, preco_original: original, emOferta: Boolean(valida) };
+        const vendido = Number(p.estoque) === 0;
+        // produto vendido não é promovido: sai do banner e do carrossel e fica na fileira, com a etiqueta
+        const valida = p.oferta && preco != null && original > preco && (!p.oferta_ate || new Date(p.oferta_ate) > agora) && !vendido;
+        return { ...p, preco, preco_original: original, vendido, emOferta: Boolean(valida) };
       });
       window.Loja.produtos = lista;
       render(lista);

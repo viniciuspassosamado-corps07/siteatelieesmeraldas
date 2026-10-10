@@ -86,7 +86,7 @@ Loja.pronto.then(() => {
         <h3>${esc(title)}</h3>
         <p class="sheet-text">${esc(text)}</p>
         <div class="sheet-price">${price}</div>
-        <a href="#" class="sheet-buy">Comprar agora</a>
+        ${produto.vendido ? '<span class="sheet-buy esgotado">Vendido</span>' : '<a href="#" class="sheet-buy">Comprar agora</a>'}
         <p class="sheet-perks">Laudo gemológico · Envio segurado · 7 dias para devolução</p>
       </div>`;
     document.body.append(backdrop, sheet);
