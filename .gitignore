@@ -7,6 +7,17 @@ PLANO-ADMIN.md
 .env.*
 !.env.example
 
+# chaves e certificados
+*.pem
+*.key
+*.p12
+*.pfx
+
+# configuração local do Claude Code e dos editores
+.claude/
+.vscode/
+.idea/
+
 # dependências e arquivos gerados
 node_modules
 *.log
