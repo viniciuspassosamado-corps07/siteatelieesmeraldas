@@ -9,6 +9,7 @@
 .env.*
 PLANO-ADMIN.md
 README.md
+supabase
 node_modules
 *.log
 *.map

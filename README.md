@@ -98,6 +98,9 @@ Navegador (visitante)                         Navegador (dono)
 │   └── config.js           URL do projeto, chave pública e limites
 ├── vendor/                 Dependências locais (supabase-js e ogl)
 ├── img/                    Imagens de apoio e fallback dos produtos
+├── supabase/
+│   ├── functions/limpar-fotos/   Edge Function que apaga fotos do bucket
+│   └── migrations/               SQL das triggers de limpeza
 ├── vercel.json             Cabeçalhos de segurança (CSP e outros)
 ├── .vercelignore           Arquivos que não vão para o ar
 └── .github/workflows/      Automações (ping do Supabase)
@@ -193,6 +196,20 @@ vercel deploy --prod
 ```
 
 Se o domínio mudar, confira também no Supabase (**Authentication → URL Configuration**) se **Site URL** e **Redirect URLs** apontam para o domínio novo, sem curingas.
+
+## Limpeza automática de fotos
+
+Quando um produto é apagado, ou uma foto (ou a foto do banner) é trocada, o bucket `produtos` não guarda os arquivos antigos. O painel já apaga as fotos pelo navegador; a automação no banco é a rede de segurança para quando isso falha.
+
+```
+produtos (DELETE / UPDATE de fotos) → trigger → pg_net → Edge Function limpar-fotos → API do Storage
+```
+
+- **Triggers** em `produtos` (`AFTER DELETE` e `AFTER UPDATE OF fotos, foto_banner`) chamam a função de forma assíncrona. Qualquer erro é capturado e nunca trava o apagamento do produto.
+- **Edge Function `limpar-fotos`** ([código](supabase/functions/limpar-fotos/index.ts)) apaga cada foto removida com a miniatura `-thumb` e, ao apagar o produto, o que sobrar na pasta `<id>/`. O Storage só remove o arquivo de verdade pela API, não por SQL.
+- **Autenticação:** a função não usa JWT; ela exige um segredo compartilhado, guardado só no Vault do Supabase, e responde 401 sem ele.
+- **Proteções:** só aceita caminhos no formato `<uuid-do-produto>/<arquivo>`, nunca toca em `exemplo/`, nunca apaga o que algum produto ainda usa e limita a 200 arquivos por chamada.
+- O SQL das triggers está em [`supabase/migrations/`](supabase/migrations/passo3_triggers_limpeza.sql).
 
 ## Manutenção automática
 
