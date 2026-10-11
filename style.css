@@ -427,3 +427,48 @@ ul{list-style:none}
   .slide,.slide *,.tile img{transition-duration:.01ms!important}
   .tile img{transform:none}
 }
+
+/* "Do ateliê até a sua casa": no desktop a linha passa por trás dos ícones; no celular ela acompanha o rolar */
+.journey{--ease:cubic-bezier(.22,1,.36,1);padding:30px 20px 110px}
+.journey-head{text-align:center;margin-bottom:34px}
+.journey .stones-title{padding:0;margin:0 0 12px;text-align:center;font-size:clamp(22px,7vw,48px)}
+.journey-sub{max-width:420px;margin:0 auto;font-size:15px;line-height:1.5;color:#6e6e73}
+.steps{position:relative;width:min(1100px,100%);margin:0 auto;--p:0}
+.journey:not(.js) .steps{--p:1}
+.jwave{display:none}
+.step-list{list-style:none;margin:0;padding:0}
+.step{position:relative;display:grid;grid-template-columns:64px 1fr;column-gap:18px;padding-bottom:34px}
+.step:last-child{padding-bottom:0}
+.step-ic{position:relative;z-index:1;width:64px;height:64px;border-radius:50%;background:#fff;display:grid;place-items:center;box-shadow:0 6px 18px rgba(0,0,0,.08),inset 0 0 0 1px #e6e6eb}
+.step-ic svg{width:40px;height:40px;filter:drop-shadow(0 4px 5px rgba(4,78,59,.25))}
+.step h3{font-size:18px;font-weight:600;letter-spacing:-.01em;color:#1d1d1f;margin:6px 0 4px}
+.step p{font-size:14px;line-height:1.5;color:#6e6e73}
+/* trilho vertical (celular): o verde cresce com o rolar */
+.steps::before,.steps::after{content:"";position:absolute;left:30px;width:4px;border-radius:2px;top:var(--rail-top,32px);height:var(--rail-h,calc(100% - 100px))}
+.steps::before{background:#e3e3e8}
+.steps::after{background:linear-gradient(#34d399,#047857);transform:scaleY(var(--p));transform-origin:top}
+/* cada etapa acende quando a linha chega nela */
+.journey.js .step-ic{opacity:.45;transform:scale(.86);transition:opacity .5s var(--ease),transform .7s var(--spring)}
+.journey.js .step-tx{opacity:.4;transform:translateY(8px);transition:opacity .6s var(--ease),transform .8s var(--ease)}
+.journey.js .step.on .step-ic,.journey.js .step.on .step-tx{opacity:1;transform:none}
+
+@media (min-width:900px){
+  .journey{padding-top:50px}
+  .journey-head{margin-bottom:46px}
+  .steps::before,.steps::after{display:none}
+  .jwave{display:block;position:absolute;left:0;top:0;width:100%;height:110px;pointer-events:none;overflow:visible}
+  .jwave path{fill:none;stroke-width:3.500;stroke-linecap:round;vector-effect:non-scaling-stroke}
+  .jw-track{stroke:#e3e3e8}
+  .jw-fill{stroke:url(#jlGrad)}
+  .jwave-fill{clip-path:inset(0 calc((1 - var(--p)) * 100%) 0 0)}
+  .step-list{display:grid;grid-template-columns:repeat(5,1fr)}
+  .step{display:block;text-align:center;padding:0 10px}
+  .step-ic{width:100%;height:110px;border-radius:0;background:none;box-shadow:none;display:block}
+  .step-ic svg{position:absolute;left:50%;top:44px;width:76px;height:76px;transform:translate(-50%,-50%)}
+  .step:nth-child(even) .step-ic svg{top:66px}
+  .step-tx{margin-top:18px}
+  .step h3{margin-top:0}
+}
+@media (prefers-reduced-motion:reduce){
+  .journey.js .step-ic,.journey.js .step-tx{transition-duration:.01ms!important}
+}

@@ -207,6 +207,75 @@ Loja.pronto.then(() => {
   loop(true);
 })();
 
+/* "Do ateliê até a sua casa": a linha passa por trás dos ícones.
+   No desktop ela se desenha sozinha quando a seção aparece; no celular acompanha o rolar da página. */
+(() => {
+  const box = document.getElementById('journey');
+  if (!box) return;
+  const secao = box.closest('.journey');
+  const steps = [...box.querySelectorAll('.step')];
+  const desktop = matchMedia('(min-width:900px)');
+  const parado = matchMedia('(prefers-reduced-motion: reduce)');
+  const lim = [];                       // ponto da linha (0 a 1) em que cada etapa acende
+  let railTop = 0, railLen = 1;         // trilho do celular: do centro do 1º ao centro do último ícone
+  let prog = 0, tocou = false;          // progresso e estado da animação do desktop
+  secao.classList.add('js');
+
+  const aplicar = (raw) => {
+    box.style.setProperty('--p', Math.min(1, Math.max(0, raw)));
+    steps.forEach((s, i) => s.classList.toggle('on', raw >= lim[i]));
+  };
+
+  const medir = () => {
+    const b = box.getBoundingClientRect();
+    if (desktop.matches) {
+      steps.forEach((s, i) => { const r = s.getBoundingClientRect(); lim[i] = (r.left + r.width / 2 - b.left) / b.width - 0.02; });
+      return;
+    }
+    const c = steps.map((s) => { const r = s.querySelector('.step-ic').getBoundingClientRect(); return r.top + r.height / 2 - b.top; });
+    railTop = c[0];
+    railLen = Math.max(1, c[c.length - 1] - c[0]);
+    c.forEach((y, i) => { lim[i] = (y - railTop) / railLen; });
+    box.style.setProperty('--rail-top', railTop + 'px');
+    box.style.setProperty('--rail-h', railLen + 'px');
+  };
+
+  const atualizar = () => {
+    if (parado.matches) return aplicar(2);   // sem animação: tudo aceso
+    if (desktop.matches) return aplicar(prog);
+    // celular: a ponta da linha fica um pouco abaixo do meio da tela
+    aplicar((innerHeight * 0.62 - (box.getBoundingClientRect().top + railTop)) / railLen);
+  };
+
+  let agendado = false;
+  addEventListener('scroll', () => {
+    if (desktop.matches || agendado) return;
+    agendado = true;
+    requestAnimationFrame(() => { agendado = false; atualizar(); });
+  }, { passive: true });
+  const remedir = () => { medir(); atualizar(); };
+  addEventListener('resize', remedir);
+  addEventListener('load', remedir);
+  desktop.addEventListener('change', () => { if (desktop.matches && !tocou) { tocou = true; prog = 1; } remedir(); });
+
+  const io = new IntersectionObserver(([e]) => {
+    if (!e.isIntersecting || tocou || !desktop.matches) return;
+    tocou = true; io.disconnect();
+    if (parado.matches) { prog = 1; return atualizar(); }
+    const t0 = performance.now(), D = 3400;
+    const passo = (t) => {
+      const x = Math.min(1, (t - t0) / D);
+      prog = x < 0.5 ? 4 * x * x * x : 1 - Math.pow(-2 * x + 2, 3) / 2;   // começa e termina devagar
+      atualizar();
+      if (x < 1) requestAnimationFrame(passo);
+    };
+    requestAnimationFrame(passo);
+  }, { threshold: 0.45 });
+  io.observe(box);
+
+  remedir();
+})();
+
 /* pesquisa: filtra os cards de pedras e joias pelo nome e pela descrição */
 (() => {
   const input = document.getElementById('searchInput');

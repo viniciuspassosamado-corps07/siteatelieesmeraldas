@@ -21,6 +21,9 @@
         <polygon points="10,70 100,70 100,185" fill="var(--g2)"/>
         <polygon points="190,70 100,70 100,185" fill="var(--g4)"/>
       </symbol>
+      <!-- cores dos ícones e da linha da seção "Do ateliê até a sua casa" -->
+      <linearGradient id="gEm" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#6ee7b7"/><stop offset=".55" stop-color="#10b981"/><stop offset="1" stop-color="#047857"/></linearGradient>
+      <linearGradient id="jlGrad" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#34d399"/><stop offset="1" stop-color="#047857"/></linearGradient>
     </defs>
   </svg>
 
@@ -126,6 +129,51 @@
       <div class="offers-fx" id="offersFx" aria-hidden="true"></div>
       <div class="slides" id="offerSlides"></div>
       <div class="segs" id="offerSegs" role="tablist" aria-label="Escolher oferta"></div>
+    </div>
+  </section>
+
+  <section class="journey" aria-labelledby="journeyTitle">
+    <div class="journey-head">
+      <h2 class="stones-title" id="journeyTitle">Do ateliê <span>até a sua casa</span></h2>
+      <p class="journey-sub">Seu produto chegando até você, com cuidado em cada etapa.</p>
+    </div>
+
+    <div class="steps" id="journey">
+      <svg class="jwave" viewBox="0 0 1000 100" preserveAspectRatio="none" aria-hidden="true"><path class="jw-track" d="M0 52 C50 46 60 40 100 40 S250 60 300 60 S450 40 500 40 S650 60 700 60 S850 40 900 40 S960 52 1000 52"/></svg>
+      <svg class="jwave jwave-fill" viewBox="0 0 1000 100" preserveAspectRatio="none" aria-hidden="true"><path class="jw-fill" d="M0 52 C50 46 60 40 100 40 S250 60 300 60 S450 40 500 40 S650 60 700 60 S850 40 900 40 S960 52 1000 52"/></svg>
+
+     <ol class="step-list">
+      <li class="step">
+        <div class="step-ic">
+          <svg viewBox="0 0 64 64" fill="none" stroke="#064e3b" stroke-width="2.2" stroke-linejoin="round" stroke-linecap="round" aria-hidden="true"><path d="M17 11h30l13 15-28 30L4 26z" fill="url(#gEm)"/><path d="M4 26h56M17 11l8 15M47 11l-8 15M25 26l7-15 7 15M25 26l7 30M39 26l-7 30"/></svg>
+        </div>
+        <div class="step-tx"><h3>Seleção</h3><p>Cada peça é escolhida e inspecionada no ateliê antes de sair.</p></div>
+      </li>
+      <li class="step">
+        <div class="step-ic">
+          <svg viewBox="0 0 64 64" fill="none" stroke="#064e3b" stroke-width="2.2" stroke-linejoin="round" stroke-linecap="round" aria-hidden="true"><rect x="10" y="6" width="38" height="48" rx="4" fill="#f4faf7"/><path d="M18 18h22M18 26h22M18 34h12"/><path d="M38 52l-2 9 8-4 8 4-2-9" fill="#34d399"/><circle cx="44" cy="44" r="10" fill="url(#gEm)"/><path d="M39.500 44l3.200 3.200 6-6.400" stroke="#fff"/></svg>
+        </div>
+        <div class="step-tx"><h3>Laudo</h3><p>Acompanha laudo gemológico que atesta a autenticidade.</p></div>
+      </li>
+      <li class="step">
+        <div class="step-ic">
+          <svg viewBox="0 0 64 64" fill="none" stroke="#064e3b" stroke-width="2.2" stroke-linejoin="round" stroke-linecap="round" aria-hidden="true"><path d="M32 6l24 12-24 12L8 18z" fill="#a7f3d0"/><path d="M8 18l24 12v28L8 46z" fill="url(#gEm)"/><path d="M56 18L32 30v28l24-12z" fill="#059669"/><path d="M20 12l24 12"/></svg>
+        </div>
+        <div class="step-tx"><h3>Embalagem</h3><p>Embalada com segurança e discrição para proteger a peça.</p></div>
+      </li>
+      <li class="step">
+        <div class="step-ic">
+          <svg viewBox="0 0 64 64" fill="none" stroke="#064e3b" stroke-width="2.2" stroke-linejoin="round" stroke-linecap="round" aria-hidden="true"><rect x="3" y="16" width="36" height="28" rx="3" fill="url(#gEm)"/><path d="M39 26h11l10 10v8H39z" fill="#a7f3d0"/><path d="M43 29h5l6 7H43z" fill="#fff"/><circle cx="16" cy="47" r="6" fill="#f4faf7"/><circle cx="48" cy="47" r="6" fill="#f4faf7"/></svg>
+        </div>
+        <div class="step-tx"><h3>Envio segurado</h3><p>Sai do ateliê com seguro e segue protegido até a entrega.</p></div>
+      </li>
+      <li class="step">
+        <div class="step-ic">
+          <svg viewBox="0 0 64 64" fill="none" stroke="#064e3b" stroke-width="2.2" stroke-linejoin="round" stroke-linecap="round" aria-hidden="true"><path d="M10 30v26h44V30" fill="#f4faf7"/><path d="M4 31L32 8l28 23z" fill="url(#gEm)"/><rect x="26" y="38" width="12" height="18" rx="2" fill="url(#gEm)"/><path d="M44 38h6v6h-6z" fill="#a7f3d0"/></svg>
+        </div>
+        <div class="step-tx"><h3>Na sua casa</h3><p>A peça chega até você, com 7 dias para devolver se quiser.</p></div>
+      </li>
+     </ol>
     </div>
   </section>
 
