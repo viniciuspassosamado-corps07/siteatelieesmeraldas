@@ -1,0 +1,14 @@
+# Fora do deploy: só o site (index.html, admin/, img/, vendor/ e os .js/.css da raiz) vai para o ar.
+# Sem este arquivo, o "vercel deploy" publicava .mcp.json e PLANO-ADMIN.md.
+.claude
+.git
+.github
+.gitignore
+.mcp.json
+.env
+.env.*
+PLANO-ADMIN.md
+README.md
+node_modules
+*.log
+*.map

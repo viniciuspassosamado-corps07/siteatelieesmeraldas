@@ -1,0 +1,25 @@
+name: Ping Supabase
+
+# Evita que o projeto gratuito do Supabase seja pausado por inatividade (7 dias sem requisições).
+# Roda duas vezes por dia (11:00 e 23:00 UTC = 08:00 e 20:00 em Brasília) e pode ser disparado à mão na aba Actions.
+on:
+  schedule:
+    - cron: '0 11,23 * * *'
+  workflow_dispatch:
+
+jobs:
+  ping:
+    runs-on: ubuntu-latest
+    timeout-minutes: 2
+    steps:
+      - name: Consulta pública à API (1 produto)
+        env:
+          SUPABASE_URL: https://vcunrbzfinnnyjviwlag.supabase.co
+          # chave pública (anon), a mesma que já vai no navegador em produtos.js
+          SUPABASE_ANON_KEY: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZjdW5yYnpmaW5ubnlqdml3bGFnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTE2NjAxOTYsImV4cCI6MjEwNzIzNjE5Nn0.t0NRuguarsR5nv6LjtndZj-0JnY0gB-w5ogyBXUsDDo
+        run: |
+          # --fail faz o job falhar (e o GitHub avisar por e-mail) se a API não responder 2xx
+          curl --fail --silent --show-error --retry 3 --retry-delay 10 \
+            -H "apikey: $SUPABASE_ANON_KEY" \
+            -H "Authorization: Bearer $SUPABASE_ANON_KEY" \
+            "$SUPABASE_URL/rest/v1/produtos?select=id&limit=1"
