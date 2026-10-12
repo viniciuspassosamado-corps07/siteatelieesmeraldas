@@ -5,18 +5,27 @@ import { createClient } from '/vendor/supabase.js';
 import { SUPABASE_URL, SUPABASE_ANON_KEY, BUCKET } from './config.js';
 import { linhaProduto, ofertaValida } from './lista.js';
 import { criarFormulario } from './form.js';
+import { criarTrocaSenha } from './senha.js';
+
+/* o link de "Esqueci a senha" volta para cá com #...type=recovery (ou #error=... se expirou);
+   lido antes do createClient, que limpa o endereço ao entrar */
+const hashInicial = new URLSearchParams(location.hash.slice(1));
+let recuperando = hashInicial.get('type') === 'recovery';
+const linkInvalido = hashInicial.has('error') || hashInicial.has('error_code');
 
 const sb = createClient(SUPABASE_URL, SUPABASE_ANON_KEY, { auth: { persistSession: true, autoRefreshToken: true } });
 const $ = (seletor) => document.querySelector(seletor);
 
 const el = {
-  barra: $('#barra'), usuario: $('#usuarioEmail'), sair: $('#sair'),
-  login: $('#login'), form: $('#loginForm'), email: $('#email'), senha: $('#senha'), erro: $('#loginErro'), entrar: $('#loginBtn'),
+  barra: $('#barra'), usuario: $('#usuarioEmail'), trocarSenha: $('#trocarSenha'), sair: $('#sair'),
+  login: $('#login'), form: $('#loginForm'), email: $('#email'), senha: $('#senha'), erro: $('#loginErro'), info: $('#loginInfo'),
+  entrar: $('#loginBtn'), esqueci: $('#esqueci'),
   painel: $('#painel'), contagem: $('#contagem'), novo: $('#novoProduto'), busca: $('#busca'), segmentos: $('#segmentos'),
   lista: $('#lista'), vazio: $('#vazio'), toast: $('#toast')
 };
 
 let produtos = [];
+let emailLogado = null;
 let filtro = 'todos';
 let termo = '';
 
@@ -34,6 +43,8 @@ const aviso = (texto) => {
 /* ---------- telas ---------- */
 const mostrarLogin = (mensagem = '') => {
   produtos = [];
+  emailLogado = null;
+  el.info.hidden = true;
   el.barra.hidden = true;
   el.painel.hidden = true;
   el.login.hidden = false;
@@ -45,6 +56,7 @@ const mostrarLogin = (mensagem = '') => {
 };
 
 const mostrarPainel = (email) => {
+  emailLogado = email;
   el.login.hidden = true;
   el.barra.hidden = false;
   el.painel.hidden = false;
@@ -102,6 +114,14 @@ const formulario = criarFormulario({
   }
 });
 
+const trocaSenha = criarTrocaSenha({ sb, aviso });
+/* quem chegou pelo link de recuperação cai direto na folha de criar a senha nova */
+const abrirRecuperacao = () => {
+  if (!recuperando || !emailLogado) return;
+  recuperando = false;
+  trocaSenha.abrir({ email: emailLogado, recuperacao: true });
+};
+
 /* ---------- login ---------- */
 const entrar = async (user) => {
   const { data, error } = await sb.from('admins').select('user_id').eq('user_id', user.id).maybeSingle();
@@ -111,6 +131,7 @@ const entrar = async (user) => {
     return;
   }
   mostrarPainel(user.email);
+  abrirRecuperacao();
   await carregar();
 };
 
@@ -137,6 +158,37 @@ el.form.addEventListener('submit', async (e) => {
 el.sair.addEventListener('click', async () => {
   await sb.auth.signOut();
   mostrarLogin();
+});
+
+el.trocarSenha.addEventListener('click', () => { if (emailLogado) trocaSenha.abrir({ email: emailLogado }); });
+
+/* "Esqueci a senha": a resposta é sempre a mesma, para não revelar quais e-mails existem */
+el.esqueci.addEventListener('click', async () => {
+  const email = el.email.value.trim();
+  el.info.hidden = true;
+  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+    el.erro.hidden = false;
+    el.erro.textContent = 'Digite seu e-mail no campo acima e toque de novo em "Esqueci a senha".';
+    el.email.focus();
+    return;
+  }
+  el.erro.hidden = true;
+  el.esqueci.disabled = true;
+  try {
+    const { error } = await sb.auth.resetPasswordForEmail(email, { redirectTo: `${location.origin}/admin/` });
+    if (error?.status === 429) {
+      el.erro.hidden = false;
+      el.erro.textContent = 'Muitos pedidos seguidos. Espere alguns minutos e tente de novo.';
+      return;
+    }
+    el.info.hidden = false;
+    el.info.textContent = 'Se esse e-mail for de um administrador, um link para criar uma senha nova chega em instantes. Confira também o spam.';
+  } catch {
+    el.erro.hidden = false;
+    el.erro.textContent = 'Sem conexão. Confira a internet e tente de novo.';
+  } finally {
+    el.esqueci.disabled = false;
+  }
 });
 
 /* ---------- visível / escondido ---------- */
@@ -183,8 +235,12 @@ document.addEventListener('error', (e) => {
 }, true);
 
 /* ---------- início ---------- */
-sb.auth.onAuthStateChange((evento) => { if (evento === 'SIGNED_OUT') mostrarLogin(); });
+sb.auth.onAuthStateChange((evento) => {
+  if (evento === 'SIGNED_OUT') mostrarLogin();
+  if (evento === 'PASSWORD_RECOVERY') { recuperando = true; abrirRecuperacao(); }
+});
 
 const { data: { session } } = await sb.auth.getSession();
+if (linkInvalido) history.replaceState(null, '', location.pathname + location.search);
 if (session) await entrar(session.user);
-else mostrarLogin();
+else mostrarLogin(linkInvalido ? 'O link para criar a senha nova expirou ou já foi usado. Toque em "Esqueci a senha" para receber outro.' : '');

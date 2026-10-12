@@ -87,3 +87,31 @@ export const validarProduto = (d, agora = new Date()) => {
 
   return { erros, valores: Object.keys(erros).length ? null : v };
 };
+
+/* ---------- senha do painel ---------- */
+/* mesmas regras do Supabase Auth ("Lowercase, uppercase letters, digits and symbols"); o Auth só
+   conta como símbolo os caracteres abaixo, e não aceita senha com mais de 72 caracteres */
+export const SENHA_MINIMO = 12;
+const SENHA_MAXIMO = 72;
+export const REGRAS_SENHA = [
+  ['tamanho', `Pelo menos ${SENHA_MINIMO} caracteres`, (s) => s.length >= SENHA_MINIMO],
+  ['minuscula', 'Uma letra minúscula', (s) => /[a-z]/.test(s)],
+  ['maiuscula', 'Uma letra maiúscula', (s) => /[A-Z]/.test(s)],
+  ['numero', 'Um número', (s) => /[0-9]/.test(s)],
+  ['simbolo', 'Um símbolo, como ! @ # $ % *', (s) => /[!@#$%^&*()_+\-=[\]{};':"\\|<>?,./`~]/.test(s)]
+];
+
+/**
+ * @param {{atual:string, nova:string, repetida:string, recuperacao:boolean}} d
+ * @returns {Record<string,string>} erros por campo (vazio = tudo certo)
+ */
+export const validarSenha = ({ atual = '', nova = '', repetida = '', recuperacao = false }) => {
+  const erros = {};
+  if (!recuperacao && !atual) erros.atual = 'Digite a senha atual.';
+  if (!nova) erros.nova = 'Digite a nova senha.';
+  else if (nova.length > SENHA_MAXIMO) erros.nova = `A senha pode ter no máximo ${SENHA_MAXIMO} caracteres.`;
+  else if (!REGRAS_SENHA.every(([, , ok]) => ok(nova))) erros.nova = 'A senha ainda não cumpre todas as regras abaixo.';
+  else if (!recuperacao && nova === atual) erros.nova = 'A nova senha precisa ser diferente da atual.';
+  if (nova && repetida !== nova) erros.repetida = 'As senhas não são iguais.';
+  return erros;
+};

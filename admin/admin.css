@@ -24,6 +24,7 @@ ul{list-style:none}
 .pill{padding:8px 16px;border-radius:999px;background:var(--field);font-size:14px;font-weight:600;transition:background .2s,transform .3s var(--spring)}
 .pill:hover{background:#e5e5ea}
 .pill:active{transform:scale(.96)}
+@media (max-width:479px){.bar-user{gap:8px}.bar-user span{display:none}}   /* no celular, os dois botões cabem melhor sem o e-mail */
 
 /* ============ login ============ */
 .login-wrap{min-height:100vh;display:grid;place-items:center;padding:24px 16px}
@@ -48,6 +49,10 @@ ul{list-style:none}
 .primario:hover{background:#0077ed}
 .primario:active{transform:scale(.98)}
 .primario:disabled{opacity:.6;cursor:default}
+.info{margin-top:14px;padding:11px 14px;border-radius:12px;background:#e8f1fd;color:#0b4f9c;font-size:14px;font-weight:500;line-height:1.4}
+.esqueci{display:block;margin:14px auto 0;padding:8px 12px;border-radius:10px;font-size:14px;font-weight:500;color:var(--blue)}
+.esqueci:hover{background:var(--field)}
+.esqueci:disabled{opacity:.5;cursor:default}
 
 /* ============ painel ============ */
 .painel{max-width:920px;margin:0 auto;padding:28px 16px 80px}
@@ -224,10 +229,22 @@ ul{list-style:none}
 .alerta-botoes button.perigo{color:#d92d20}
 .alerta-botoes button:active{background:rgba(0,0,0,.06)}
 
+/* folha "Trocar senha": do tamanho do conteúdo (no celular sobe de baixo; no computador fica no centro) */
+.folha-senha{top:auto;max-height:calc(100% - 12px)}
+.regras{display:grid;gap:5px;margin:10px 0 2px 2px}
+.regras li{position:relative;padding-left:22px;font-size:13px;color:var(--mute2);transition:color .2s}
+.regras li::before{content:"";position:absolute;left:3px;top:4px;width:9px;height:9px;border-radius:50%;border:1.5px solid #c4c7cc;transition:background .2s,border-color .2s}
+.regras li.ok{color:#1f7a3a}
+.regras li.ok::before{background:var(--green);border-color:var(--green)}
+.mostrar{display:flex;align-items:center;gap:8px;margin-top:14px;font-size:14px;color:var(--mute);cursor:pointer}
+.mostrar input{width:18px;height:18px;accent-color:var(--blue)}
+
 @media (min-width:640px){
   .folha{left:50%;right:auto;top:5vh;bottom:5vh;width:min(580px,calc(100% - 32px));border-radius:28px;transform:translate(-50%,40px);opacity:0;transition:transform .55s cubic-bezier(.22,1,.36,1),opacity .35s ease}
   .folha.on{transform:translate(-50%,0);opacity:1}
   .folha-topo{border-radius:28px 28px 0 0}
   .fotos{grid-template-columns:repeat(4,minmax(0,1fr))}
+  .folha-senha{top:50%;bottom:auto;max-height:90vh;width:min(440px,calc(100% - 32px));transform:translate(-50%,calc(-50% + 40px))}
+  .folha-senha.on{transform:translate(-50%,-50%)}
 }
 @media (prefers-reduced-motion:reduce){.folha,.fundo,.alerta{transition-duration:.01ms}}

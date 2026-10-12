@@ -1,29 +1,34 @@
-.vercel
-.mcp.json
-PLANO-ADMIN.md
-
-# segredos e variáveis de ambiente (nunca vão para o GitHub)
+# --- Segredos: nunca vão para o GitHub ---
 .env
 .env.*
 !.env.example
-
-# chaves e certificados
 *.pem
 *.key
 *.p12
 *.pfx
 
-# configuração local do Claude Code e dos editores
+# --- Arquivos locais do projeto que não fazem parte do site ---
+.mcp.json
+PLANO-ADMIN.md
+.vercel
+
+# --- Claude Code e editores ---
 .claude/
 .vscode/
 .idea/
 
-# dependências e arquivos gerados
+# --- Supabase CLI (estado local da máquina, pode guardar tokens) ---
+supabase/.branches
+supabase/.temp
+
+# --- Cópias do banco (podem conter dados e senhas) ---
+*.dump
+*.backup
+backup*.sql
+dump*.sql
+
+# --- Gerados automaticamente ---
 node_modules
 *.log
 .DS_Store
 Thumbs.db
-
-# Supabase local (CLI): guarda estado e chaves da máquina de quem desenvolve
-supabase/.branches
-supabase/.temp

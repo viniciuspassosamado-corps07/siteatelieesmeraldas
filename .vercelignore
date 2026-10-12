@@ -1,15 +1,14 @@
-# Fora do deploy: só o site (index.html, admin/, img/, vendor/ e os .js/.css da raiz) vai para o ar.
-# Sem este arquivo, o "vercel deploy" publicava .mcp.json e PLANO-ADMIN.md.
-.claude
-.git
-.github
-.gitignore
-.mcp.json
-.env
-.env.*
-PLANO-ADMIN.md
-README.md
-supabase
-node_modules
-*.log
-*.map
+# Lista do que PUBLICAR: tudo fica fora do deploy, menos o que está liberado com "!".
+# Arquivo novo do site precisa entrar aqui; se esquecer, ele dá 404 (nunca vaza).
+/*
+!index.html
+!style.css
+!script.js
+!produtos.js
+!ripple.js
+!comprimir-imagem.js
+# vercel.json liga os cabeçalhos de segurança; a Vercel não o serve ao público
+!vercel.json
+!admin
+!img
+!vendor

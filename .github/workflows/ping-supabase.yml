@@ -7,6 +7,9 @@ on:
     - cron: '0 11,23 * * *'
   workflow_dispatch:
 
+# O job só faz um curl para fora: o GITHUB_TOKEN não precisa de nenhuma permissão no repositório.
+permissions: {}
+
 jobs:
   ping:
     runs-on: ubuntu-latest
