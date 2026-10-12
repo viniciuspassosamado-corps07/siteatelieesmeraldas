@@ -559,6 +559,9 @@ ul{list-style:none}
 }
 .enc-campo input:focus,.enc-campo textarea:focus{background:#fff;border-color:#059669;box-shadow:0 0 0 4px rgba(16,185,129,.15)}
 .enc-campo input:disabled{opacity:.5}
+/* campo de data: no celular (principalmente iPhone) ele tem largura mínima própria e passava da borda do cartão */
+.enc-campo input[type="date"]{display:block;min-width:0;max-width:100%;min-height:50px;-webkit-appearance:none;appearance:none}
+.enc-campo input[type="date"]::-webkit-date-and-time-value{text-align:left}
 .enc-check{display:flex;align-items:center;gap:8px;margin-top:12px;font-size:14px;color:#3a3a3c;cursor:pointer}
 .enc-check input{width:18px;height:18px;accent-color:#059669}
 .enc-dica{margin-top:6px;font-size:12.5px;line-height:1.45;color:#86868b}
