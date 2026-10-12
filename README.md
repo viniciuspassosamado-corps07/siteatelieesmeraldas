@@ -19,6 +19,9 @@ Vitrine online de pedras preciosas e joias exclusivas, com catálogo dinâmico e
 - [Como rodar localmente](#como-rodar-localmente)
 - [Painel administrativo](#painel-administrativo)
 - [Deploy](#deploy)
+- [Limpeza automática de fotos](#limpeza-automática-de-fotos)
+- [Banco de dados e migrations](#banco-de-dados-e-migrations)
+- [Backup](#backup)
 - [Manutenção automática](#manutenção-automática)
 - [Roadmap](#roadmap)
 
@@ -42,6 +45,7 @@ O projeto é um site estático (HTML, CSS e JavaScript puros, sem etapa de build
 - **Banner de abertura** com cena do ateliê e, em seguida, os produtos escolhidos pelo dono (até 5), com transição suave entre as cenas.
 - **Carrossel "Ofertas imperdíveis"** (até 8 ofertas) com efeito de água nas fotos. Ofertas além do limite continuam nas fileiras, com etiqueta de desconto.
 - **Fileiras de pedras e joias** com rolagem horizontal.
+- **"Do ateliê até a sua casa"**: as 5 etapas da entrega. No computador, uma linha ondulada se desenha por trás dos ícones; no celular, uma linha vertical acompanha a rolagem.
 - **Folha do produto**: o card se expande em uma janela com galeria de fotos (deslizar, setas e indicadores), título, descrição e preço.
 - **Pesquisa** que filtra os produtos por nome e descrição.
 - **Selos de confiança** animados e CNPJ da empresa.
@@ -52,6 +56,8 @@ O projeto é um site estático (HTML, CSS e JavaScript puros, sem etapa de build
 ### Painel administrativo
 
 - Login seguro, exclusivo para quem está na tabela `admins`.
+- **Trocar senha** (botão "Senha" no topo): confere a senha atual, mostra as regras enquanto o dono digita e desconecta os outros aparelhos ao salvar.
+- **Esqueci a senha** na tela de login: envia um link por e-mail que abre direto a tela de criar a senha nova. A resposta é sempre a mesma, para não revelar quais e-mails são de administradores.
 - Criar, editar, esconder e apagar produtos.
 - Oferta com preço original, preço promocional e desconto calculado, com data de término opcional.
 - Várias fotos por produto, com **compressão automática no navegador** (WebP, 1600 px na versão cheia e 500 px na miniatura, mantendo transparência).
@@ -94,15 +100,16 @@ Navegador (visitante)                         Navegador (dono)
 │   ├── admin.js            Login e navegação do painel
 │   ├── lista.js            Lista de produtos
 │   ├── form.js             Cadastro e edição de produto
-│   ├── validacao.js        Validação dos campos
+│   ├── senha.js            Trocar senha e criar senha nova (recuperação)
+│   ├── validacao.js        Validação dos campos e regras da senha
 │   └── config.js           URL do projeto, chave pública e limites
 ├── vendor/                 Dependências locais (supabase-js e ogl)
 ├── img/                    Imagens de apoio e fallback dos produtos
 ├── supabase/
 │   ├── functions/limpar-fotos/   Edge Function que apaga fotos do bucket
-│   └── migrations/               SQL das triggers de limpeza
+│   └── migrations/               Todo o banco em SQL, na ordem de aplicação
 ├── vercel.json             Cabeçalhos de segurança (CSP e outros)
-├── .vercelignore           Arquivos que não vão para o ar
+├── .vercelignore           Lista do que PODE ir para o ar (o resto fica fora)
 └── .github/workflows/      Automações (ping do Supabase)
 ```
 
@@ -131,13 +138,20 @@ Navegador (visitante)                         Navegador (dono)
 
 - **RLS ativo** nas tabelas: o público só lê produtos ativos; criar, editar e apagar exige ser admin.
 - **Cadastro público desativado** no Supabase Auth. Novos administradores são criados manualmente.
-- **Política de senha forte** (mínimo de 12 caracteres, com complexidade) e confirmação de e-mail.
+- **Senha forte**: o painel exige 12 caracteres ou mais, com maiúscula, minúscula, número e símbolo. A mesma regra precisa estar configurada no Supabase (**Authentication → Policies**), porque a checagem do painel sozinha não impede quem chama a API direto.
+- **Trava contra apagamento em massa**: o banco recusa um único comando que apague mais de 3 produtos, e também o `TRUNCATE`. O painel apaga um produto por vez e não é afetado. Para apagar vários de propósito, use o SQL Editor:
+  ```sql
+  begin;
+  set local app.apagar_em_massa = 'sim';
+  delete from public.produtos where ...;
+  commit;
+  ```
 - **Content Security Policy** restritiva em `vercel.json` (scripts apenas do próprio domínio, sem inline), além de `X-Content-Type-Options`, `X-Frame-Options: DENY`, `Referrer-Policy` e `Permissions-Policy`.
 - **Dependências locais** em `vendor/`, sem scripts carregados de CDNs.
 - **`/admin` fora dos buscadores** (`noindex, nofollow`).
 - **Nenhuma chave secreta no código ou no histórico.** A chave pública (`anon`) é pública por desenho e fica no front-end.
 - Textos vindos do banco são escapados antes de entrar no HTML.
-- `.vercelignore` impede a publicação de arquivos internos.
+- `.vercelignore` funciona como lista do que pode ser publicado: arquivos internos (`.env`, `README.md`, `supabase/`, `.github/` etc.) nunca vão para o ar.
 
 Encontrou uma vulnerabilidade? Avise o responsável pelo projeto de forma privada, sem abrir uma issue pública.
 
@@ -186,8 +200,10 @@ O site é estático: qualquer commit na branch `main` pode ser publicado na Verc
 
 1. Importe este repositório na Vercel.
 2. Framework preset: **Other**. Sem comando de build e sem pasta de saída específica (raiz do projeto).
-3. O `vercel.json` aplica os cabeçalhos de segurança e o `.vercelignore` filtra os arquivos internos.
+3. O `vercel.json` aplica os cabeçalhos de segurança e o `.vercelignore` define o que é publicado. Não há variáveis de ambiente.
 4. Aponte o domínio da loja para o projeto.
+
+> **Arquivo novo no site?** Acrescente-o ao `.vercelignore` com `!` na frente (ex.: `!novo-arquivo.js`). Arquivos fora dessa lista dão 404 no ar, de propósito.
 
 Via linha de comando, a partir da pasta do projeto:
 
@@ -195,7 +211,12 @@ Via linha de comando, a partir da pasta do projeto:
 vercel deploy --prod
 ```
 
-Se o domínio mudar, confira também no Supabase (**Authentication → URL Configuration**) se **Site URL** e **Redirect URLs** apontam para o domínio novo, sem curingas.
+**Se o domínio mudar**, atualize no Supabase (**Authentication → URL Configuration**):
+
+- **Site URL**: o domínio novo, por exemplo `https://dominio-da-loja.com.br`.
+- **Redirect URLs**: só `https://dominio-da-loja.com.br/admin/**`, sem curinga solto e sem `localhost`.
+
+Sem isso, o link do "Esqueci a senha" leva para o endereço antigo.
 
 ## Limpeza automática de fotos
 
@@ -209,7 +230,34 @@ produtos (DELETE / UPDATE de fotos) → trigger → pg_net → Edge Function lim
 - **Edge Function `limpar-fotos`** ([código](supabase/functions/limpar-fotos/index.ts)) apaga cada foto removida com a miniatura `-thumb` e, ao apagar o produto, o que sobrar na pasta `<id>/`. O Storage só remove o arquivo de verdade pela API, não por SQL.
 - **Autenticação:** a função não usa JWT; ela exige um segredo compartilhado, guardado só no Vault do Supabase, e responde 401 sem ele.
 - **Proteções:** só aceita caminhos no formato `<uuid-do-produto>/<arquivo>`, nunca toca em `exemplo/`, nunca apaga o que algum produto ainda usa e limita a 200 arquivos por chamada.
-- O SQL das triggers está em [`supabase/migrations/`](supabase/migrations/passo3_triggers_limpeza.sql).
+- O SQL das triggers está em [`supabase/migrations/passo3_triggers_limpeza.sql`](supabase/migrations/passo3_triggers_limpeza.sql).
+
+## Banco de dados e migrations
+
+A pasta [`supabase/migrations/`](supabase/migrations/) guarda todo o banco em SQL: tabelas, RLS, permissões, bucket, limpeza de fotos e trava contra apagamento em massa. Aplicados **na ordem dos nomes** num projeto Supabase vazio, recriam o banco inteiro (os produtos e as fotos não vêm junto).
+
+| Arquivo | O que faz |
+|---|---|
+| `20261010205411_cria_produtos_admins_e_fotos` | Tabelas `produtos` e `admins`, RLS, `is_admin()` e bucket `produtos` |
+| `20261010211616_admin_le_objetos_do_bucket_produtos` | Admin pode listar os arquivos do bucket |
+| `20261010215211_endurece_permissoes_e_validacoes_produtos` | Permissões mínimas e validações dos campos |
+| `20261010221409_adiciona_banner_aos_produtos` | Campos `no_banner` e `foto_banner` |
+| `20261011131720_limpeza_fotos_passo1_pgnet_e_segredo` | `pg_net` e segredo da limpeza no Vault |
+| `20261011131754_limpeza_fotos_passo2_funcoes_de_apoio` | Funções de apoio da limpeza de fotos |
+| `passo3_triggers_limpeza` | Triggers da limpeza de fotos (aplicar depois do passo 2) |
+| `20261012040000_trava_apagar_produtos_em_massa` | Trava contra apagar mais de 3 produtos e contra `TRUNCATE` |
+
+A Edge Function `limpar-fotos` é publicada à parte (pasta `supabase/functions/`).
+
+## Backup
+
+O plano gratuito do Supabase **não tem backup automático**, e em nenhum plano o backup inclui as fotos do Storage. Até haver outra solução, faça uma cópia manual de tempos em tempos, principalmente antes de mudanças grandes:
+
+1. **Produtos:** Table Editor → `produtos` → **Export → CSV**.
+2. **Fotos:** Storage → bucket `produtos` → baixe as pastas.
+3. Guarde os dois fora do Supabase (Google Drive, por exemplo).
+
+No plano Pro, o Supabase guarda backups diários do banco por 7 dias.
 
 ## Manutenção automática
 
@@ -227,6 +275,8 @@ O plano gratuito do Supabase **pausa o projeto após 7 dias sem requisições**.
 - [ ] Cálculo de frete.
 - [ ] Adequação à LGPD (política de privacidade e consentimento).
 - [ ] Domínio próprio e migração da hospedagem para a conta do cliente.
+- [ ] Lixeira de produtos apagados (com volta em até 30 dias) e botão "Baixar backup" no painel.
+- [ ] Login em dois passos (MFA) no painel.
 
 ---
 
