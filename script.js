@@ -96,7 +96,7 @@ Loja.pronto.then(() => {
         <p class="sheet-text">${esc(text)}</p>
         <div class="sheet-price">${price}</div>
         ${produto.vendido ? '<span class="sheet-buy esgotado">Vendido</span>' : '<a href="#" class="sheet-buy">Comprar agora</a>'}
-        <p class="sheet-perks">Laudo gemológico · Envio segurado · 7 dias para devolução</p>
+        <p class="sheet-perks">Nota fiscal · Envio segurado · 7 dias para devolução</p>
       </div>`;
     document.body.append(backdrop, sheet);
 
@@ -303,6 +303,27 @@ Loja.pronto.then(() => {
     });
     empty.hidden = total > 0;
   });
+})();
+
+/* contato: o que o visitante digita vai pronto para a conversa do WhatsApp */
+(() => {
+  const msg = document.getElementById('contatoMsg');
+  const btn = document.getElementById('contatoBtn');
+  if (!msg || !btn) return;
+  const base = 'https://wa.me/5511963799306?text=';
+  const padrao = 'Olá! Vim pelo site do Ateliê das Esmeraldas e gostaria de atendimento.';
+  const atualizar = () => { btn.href = base + encodeURIComponent(msg.value.trim() || padrao); };
+  msg.addEventListener('input', atualizar);
+  atualizar();
+
+  /* o botão fixo do WhatsApp sai de cena enquanto o cartão de contato aparece e volta depois */
+  const fixo = document.querySelector('.wa-fixo');
+  const cartao = document.querySelector('.contato-card');
+  if (!fixo || !cartao || !('IntersectionObserver' in window)) return;
+  new IntersectionObserver(([e]) => {
+    fixo.classList.toggle('fora', e.isIntersecting);
+    if (e.isIntersecting) fixo.setAttribute('tabindex', '-1'); else fixo.removeAttribute('tabindex');
+  }, { threshold: 0.15 }).observe(cartao);
 })();
 
 toggleBtn.addEventListener('click', () => setOpen(!island.classList.contains('open')));

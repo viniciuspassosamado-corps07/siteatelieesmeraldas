@@ -472,3 +472,66 @@ ul{list-style:none}
 @media (prefers-reduced-motion:reduce){
   .journey.js .step-ic,.journey.js .step-tx{transition-duration:.01ms!important}
 }
+
+/* cartão de contato: leva ao WhatsApp do ateliê */
+.contato{padding:0 16px 90px}
+.contato-card{
+  position:relative;overflow:hidden;width:min(1000px,100%);margin:0 auto;padding:44px 24px 36px;border-radius:32px;color:#fff;
+  background:radial-gradient(110% 80% at 90% 0%,rgba(52,211,153,.45),transparent 60%),linear-gradient(160deg,#065f46,#022c22 70%);
+  box-shadow:0 30px 70px rgba(2,44,34,.35),inset 0 1px 0 rgba(255,255,255,.12);
+}
+.contato-gem{position:absolute;right:-28px;top:-22px;width:150px;opacity:.9;pointer-events:none;filter:drop-shadow(0 18px 30px rgba(0,0,0,.4));animation:contatoFlutua 6s ease-in-out infinite}
+@keyframes contatoFlutua{0%,100%{transform:translateY(0) rotate(-8deg)}50%{transform:translateY(-10px) rotate(-3deg)}}
+.contato-tx{position:relative;max-width:560px}
+.contato-tag{display:inline-block;padding:6px 12px;border-radius:999px;background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.18);font-size:12px;font-weight:500;letter-spacing:.12em;text-transform:uppercase;color:#a7f3d0}
+.contato-rotulo{display:block;margin:22px 0 12px;text-align:center;font-family:var(--sans);font-size:clamp(20px,6vw,34px);font-weight:700;letter-spacing:.06em;line-height:1.15;text-transform:uppercase}
+.contato-msg{
+  display:block;width:100%;min-height:120px;padding:16px 18px;border-radius:20px;resize:vertical;
+  border:1px solid rgba(255,255,255,.22);background:rgba(255,255,255,.1);-webkit-backdrop-filter:blur(10px);backdrop-filter:blur(10px);
+  font:inherit;font-size:16px;line-height:1.5;color:#fff;outline:0;transition:border-color .3s ease,background .3s ease,box-shadow .3s ease;
+}
+.contato-msg::placeholder{color:rgba(255,255,255,.55)}
+.contato-msg:focus{border-color:#6ee7b7;background:rgba(255,255,255,.14);box-shadow:0 0 0 4px rgba(110,231,183,.2)}
+.contato-texto{margin-top:18px;font-size:15px;line-height:1.6;color:rgba(255,255,255,.78)}
+.contato-lista{display:grid;gap:10px;margin:22px 0 28px}
+.contato-lista li{position:relative;padding-left:30px;font-size:15px;font-weight:500}
+.contato-lista li::before{content:"";position:absolute;left:0;top:1px;width:20px;height:20px;border-radius:50%;background:#34d399 url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20' fill='none' stroke='%23022c22' stroke-width='2.4' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M6 10.5l2.6 2.6L14 7.5'/%3E%3C/svg%3E") center/100% no-repeat}
+.contato-btn{
+  position:relative;overflow:hidden;display:flex;align-items:center;justify-content:center;gap:10px;width:100%;padding:17px 24px;border-radius:999px;
+  background:#fff;color:#064e3b;font-size:17px;font-weight:600;box-shadow:0 12px 30px rgba(0,0,0,.25);
+  transition:transform .4s var(--spring),box-shadow .3s ease;
+}
+.contato-btn svg{width:24px;height:24px;color:#16a34a}
+.contato-btn::after{content:"";position:absolute;inset:0;background:linear-gradient(100deg,transparent 30%,rgba(52,211,153,.35) 50%,transparent 70%) 0 0/250% 100%;animation:contatoBrilho 3.2s ease-in-out infinite}
+@keyframes contatoBrilho{from{background-position:150% 0}to{background-position:-60% 0}}
+.contato-btn:hover{transform:translateY(-2px);box-shadow:0 18px 40px rgba(0,0,0,.3)}
+.contato-btn:active{transform:scale(.98)}
+.contato-btn:focus-visible{outline:3px solid #a7f3d0;outline-offset:3px}
+.contato-num{margin-top:14px;text-align:center;font-size:14px;color:rgba(255,255,255,.65)}
+.contato-num a{color:#fff;font-weight:600;text-decoration:underline;text-underline-offset:3px;text-decoration-color:rgba(255,255,255,.35)}
+
+@media (min-width:900px){
+  .contato-card{padding:64px 64px 56px}
+  .contato-gem{right:6%;top:50%;width:300px;margin-top:-150px}
+  .contato-btn{display:inline-flex;width:auto;padding:18px 34px}
+  .contato-num{text-align:left}
+}
+@media (prefers-reduced-motion:reduce){.contato-gem,.contato-btn::after{animation:none}}
+
+/* botão fixo do WhatsApp: fica abaixo do menu (100) e da folha do produto (200) */
+.wa-fixo{
+  position:fixed;z-index:90;right:calc(16px + env(safe-area-inset-right));bottom:calc(18px + env(safe-area-inset-bottom));
+  width:58px;height:58px;border-radius:50%;display:grid;place-items:center;color:#fff;
+  background:linear-gradient(145deg,#34e07a,#16a34a);box-shadow:0 10px 26px rgba(22,163,74,.45),inset 0 1px 0 rgba(255,255,255,.35);
+  transition:transform .5s var(--spring),box-shadow .3s ease,opacity .3s ease;
+}
+.wa-fixo svg{width:30px;height:30px}
+/* sai de cena enquanto o cartão de contato está na tela (lá já tem o botão do WhatsApp) */
+.wa-fixo.fora{transform:translateY(calc(100% + 40px)) scale(.7);opacity:0;pointer-events:none}
+.wa-fixo::before{content:"";position:absolute;inset:0;border-radius:50%;border:2px solid #22c55e;animation:waPulso 2.6s ease-out infinite}
+@keyframes waPulso{0%{transform:scale(1);opacity:.7}100%{transform:scale(1.55);opacity:0}}
+.wa-fixo:hover{transform:scale(1.07);box-shadow:0 14px 32px rgba(22,163,74,.55)}
+.wa-fixo:active{transform:scale(.95)}
+.wa-fixo:focus-visible{outline:3px solid #1d1d1f;outline-offset:3px}
+@media (min-width:720px){.wa-fixo{right:24px;bottom:24px;width:62px;height:62px}}
+@media (prefers-reduced-motion:reduce){.wa-fixo::before{animation:none;opacity:0}}
