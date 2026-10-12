@@ -315,15 +315,215 @@ Loja.pronto.then(() => {
   const atualizar = () => { btn.href = base + encodeURIComponent(msg.value.trim() || padrao); };
   msg.addEventListener('input', atualizar);
   atualizar();
+})();
 
-  /* o botão fixo do WhatsApp sai de cena enquanto o cartão de contato aparece e volta depois */
-  const fixo = document.querySelector('.wa-fixo');
-  const cartao = document.querySelector('.contato-card');
-  if (!fixo || !cartao || !('IntersectionObserver' in window)) return;
-  new IntersectionObserver(([e]) => {
-    fixo.classList.toggle('fora', e.isIntersecting);
-    if (e.isIntersecting) fixo.setAttribute('tabindex', '-1'); else fixo.removeAttribute('tabindex');
-  }, { threshold: 0.15 }).observe(cartao);
+/* "Crie a sua joia": passo a passo da encomenda; no fim, o pedido vai pronto para o WhatsApp do ateliê */
+(() => {
+  const card = document.getElementById('encCard');
+  if (!card) return;
+  const $ = (s) => card.querySelector(s);
+  const etapas = [...card.querySelectorAll('.enc-etapa')];
+  const TOTAL = 5;   // a 6ª etapa é o resumo
+  const est = { peca: '', metal: '', pedra: '', par: 'Par', prazo: '', orcamento: '' };
+  let atual = 1;
+
+  const campo = {
+    aro1: $('#encAro1'), aro2: $('#encAro2'), naoSei: $('#encNaoSeiAro'),
+    gravacao: $('#encGravacao'), ideia: $('#encIdeia'), data: $('#encData')
+  };
+  const erro = $('#encErro');
+  const voltar = document.getElementById('encVoltar');
+  const avancar = document.getElementById('encAvancar');
+  const ehAlianca = () => est.peca === 'Aliança';
+
+  const mostrarErro = (texto = '') => { erro.hidden = !texto; erro.textContent = texto; };
+
+  /* ajusta o passo 4 conforme a peça (aliança tem aro e gravação) e o par/uma */
+  const ajustarDetalhes = () => {
+    $('[data-so="alianca"]').hidden = !ehAlianca();
+    const par = est.par === 'Par';
+    $('[data-aro2]').hidden = !par;
+    $('[data-rotulo-aro1]').textContent = par ? 'Aro 1' : 'Aro';
+    campo.aro1.disabled = campo.aro2.disabled = campo.naoSei.checked;
+    $('[data-rotulo-ideia]').textContent = ehAlianca() ? 'Algum detalhe a mais? (opcional)' : 'Descreva sua ideia';
+  };
+
+  const irPara = (n) => {
+    atual = n;
+    mostrarErro();
+    etapas.forEach((f) => { f.hidden = Number(f.dataset.etapa) !== n; });
+    $('#encPasso').textContent = n > TOTAL ? 'Tudo pronto' : `Passo ${n} de ${TOTAL}`;
+    $('#encBarra').style.width = `${(Math.min(n, TOTAL + 1) - 1) / TOTAL * 100}%`;
+    voltar.hidden = n === 1;
+    avancar.hidden = n > TOTAL;
+    avancar.textContent = n === TOTAL ? 'Ver meu pedido' : 'Continuar';
+    if (n === 4) ajustarDetalhes();
+    if (n > TOTAL) montarResumo();
+    const atualEl = etapas.find((f) => !f.hidden);
+    atualEl?.querySelector('legend')?.focus({ preventScroll: true });
+    const topo = card.getBoundingClientRect().top;
+    if (topo < 70 || topo > innerHeight * 0.6) card.scrollIntoView({ behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth', block: 'start' });
+  };
+
+  const hoje = () => { const d = new Date(); d.setHours(0, 0, 0, 0); return d; };
+  const aroValido = (v) => !v || (/^\d{1,2}$/.test(v) && Number(v) >= 5 && Number(v) <= 35);
+
+  const validar = () => {
+    if (atual === 1 && !est.peca) return 'Escolha a peça para continuar.';
+    if (atual === 2 && !est.metal) return 'Escolha o metal (ou "Ainda não sei").';
+    if (atual === 3 && !est.pedra) return 'Escolha a pedra (ou "Sem pedra").';
+    if (atual === 4) {
+      if (ehAlianca() && !campo.naoSei.checked) {
+        if (!aroValido(campo.aro1.value.trim()) || (est.par === 'Par' && !aroValido(campo.aro2.value.trim()))) return 'O aro é um número entre 5 e 35. Se não souber, marque "Ainda não sei".';
+      }
+      if (!ehAlianca() && !campo.ideia.value.trim()) return 'Conte um pouco da sua ideia para o ateliê.';
+    }
+    if (atual === 5) {
+      if (!est.prazo) return 'Escolha o prazo.';
+      if (est.prazo === 'Tenho uma data') {
+        const [a, m, d] = campo.data.value.split('-').map(Number);
+        if (!a || new Date(a, m - 1, d) < hoje()) return 'Escolha uma data a partir de hoje.';
+      }
+    }
+    return '';
+  };
+
+  /* as linhas do pedido (usadas no resumo e na mensagem do WhatsApp) */
+  const linhas = () => {
+    const l = [];
+    if (ehAlianca()) l.push(['Peça', est.par === 'Par' ? 'Par de alianças' : 'Uma aliança']);
+    else l.push(['Peça', est.peca]);
+    l.push(['Metal', est.metal], ['Pedra', est.pedra]);
+    if (ehAlianca()) {
+      const a1 = campo.aro1.value.trim(); const a2 = campo.aro2.value.trim();
+      if (campo.naoSei.checked) l.push(['Aro', 'Ainda não sei (preciso de ajuda para medir)']);
+      else if (est.par === 'Par' && (a1 || a2)) l.push(['Aros', `${a1 || '?'} e ${a2 || '?'}`]);
+      else if (a1) l.push(['Aro', a1]);
+      const g = campo.gravacao.value.trim();
+      if (g) l.push(['Gravação', `"${g}"`]);
+    }
+    const ideia = campo.ideia.value.trim();
+    if (ideia) l.push([ehAlianca() ? 'Detalhes' : 'Ideia', ideia]);
+    if (est.prazo === 'Tenho uma data') l.push(['Prazo', `Até ${campo.data.value.split('-').reverse().join('/')}`]);
+    else l.push(['Prazo', est.prazo]);
+    if (est.orcamento) l.push(['Orçamento', est.orcamento]);
+    return l;
+  };
+
+  const montarResumo = () => {
+    const resumo = $('#encResumo');
+    resumo.replaceChildren(...linhas().map(([k, v]) => {
+      const div = document.createElement('div');
+      const dt = document.createElement('dt'); dt.textContent = k;
+      const dd = document.createElement('dd'); dd.textContent = v;
+      div.append(dt, dd);
+      return div;
+    }));
+    const texto = ['*Pedido de joia personalizada* (pelo site)', '', ...linhas().map(([k, v]) => `• ${k}: ${v}`)].join('\n');
+    $('#encEnviar').href = 'https://wa.me/5511963799306?text=' + encodeURIComponent(texto);
+  };
+
+  /* escolhas (botões de opção) */
+  card.addEventListener('click', (e) => {
+    const b = e.target.closest('.enc-opcoes button[data-v]');
+    if (!b) return;
+    const grupo = b.closest('[data-campo]');
+    const nome = grupo.dataset.campo;
+    const repetido = est[nome] === b.dataset.v;
+    est[nome] = b.dataset.v;
+    grupo.querySelectorAll('button').forEach((x) => x.setAttribute('aria-checked', String(x === b)));
+    mostrarErro();
+    if (nome === 'par') ajustarDetalhes();
+    if (nome === 'prazo') {
+      $('[data-bloco-data]').hidden = est.prazo !== 'Tenho uma data';
+      if (est.prazo === 'Tenho uma data') campo.data.min = new Date(Date.now() - new Date().getTimezoneOffset() * 6e4).toISOString().slice(0, 10);
+    }
+    /* nos passos de uma escolha só, segue sozinho */
+    if (atual <= 3 && !repetido) setTimeout(() => { if (atual <= 3 && est[nome] === b.dataset.v) irPara(atual + 1); }, 280);
+  });
+  campo.naoSei.addEventListener('change', ajustarDetalhes);
+  [campo.aro1, campo.aro2].forEach((i) => i.addEventListener('input', () => { i.value = i.value.replace(/\D/g, '').slice(0, 2); }));
+
+  avancar.addEventListener('click', () => {
+    const msg = validar();
+    if (msg) return mostrarErro(msg);
+    irPara(atual + 1);
+  });
+  voltar.addEventListener('click', () => irPara(Math.max(1, atual - 1)));
+  $('#encRecomecar').addEventListener('click', () => {
+    Object.assign(est, { peca: '', metal: '', pedra: '', par: 'Par', prazo: '', orcamento: '' });
+    card.querySelectorAll('.enc-opcoes button').forEach((x) => x.setAttribute('aria-checked', String(x.dataset.v === 'Par')));
+    Object.values(campo).forEach((c) => { if (c.type === 'checkbox') c.checked = false; else c.value = ''; });
+    $('[data-bloco-data]').hidden = true;
+    irPara(1);
+  });
+})();
+
+/* dock fixo: atalhos, ponto na seção atual, número de ofertas e recolhe ao rolar para baixo */
+(() => {
+  const dock = document.getElementById('dock');
+  if (!dock) return;
+  const suave = () => (matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth');
+
+  /* links internos com rolagem suave (o menu do topo cobre ~80px) */
+  dock.addEventListener('click', (e) => {
+    const a = e.target.closest('a[href^="#"]');
+    if (a) {
+      const alvo = document.querySelector(a.getAttribute('href'));
+      if (!alvo) return;
+      e.preventDefault();
+      alvo.scrollIntoView({ behavior: suave(), block: 'start' });
+      return;
+    }
+    if (e.target.closest('[data-dock="busca"]')) {
+      const campo = document.getElementById('searchInput');
+      if (!campo) return;
+      campo.focus({ preventScroll: true });
+      campo.closest('form').scrollIntoView({ behavior: suave(), block: 'center' });
+    }
+  });
+
+  /* "Ofertas": bolinha com quantas há; sem ofertas, o atalho some */
+  const itemOfertas = dock.querySelector('[data-dock="ofertas"]');
+  window.Loja?.pronto?.then(() => {
+    const n = Loja.selecionar(Loja.produtos).carrossel.length;
+    itemOfertas.hidden = n === 0;
+    const badge = itemOfertas.querySelector('.dock-badge');
+    badge.hidden = n === 0;
+    badge.textContent = String(n);
+    itemOfertas.setAttribute('aria-label', n ? `Ofertas (${n})` : 'Ofertas');
+  });
+
+  /* ponto embaixo do atalho da seção em que a pessoa está */
+  const secoes = [['encomenda', '#encomenda'], ['ofertas', '#ofertas'], ['whats', '.contato']]
+    .map(([id, sel]) => [dock.querySelector(`[data-dock="${id}"]`), document.querySelector(sel)])
+    .filter(([item, el]) => item && el);
+  if ('IntersectionObserver' in window) {
+    const visiveis = new Set();
+    const io = new IntersectionObserver((entradas) => {
+      entradas.forEach((en) => (en.isIntersecting ? visiveis.add(en.target) : visiveis.delete(en.target)));
+      secoes.forEach(([item, el]) => item.classList.toggle('on', visiveis.has(el)));
+    }, { rootMargin: '-45% 0px -45% 0px' });
+    secoes.forEach(([, el]) => io.observe(el));
+  }
+
+  /* recolhe ao rolar para baixo e volta ao rolar para cima (ou perto do fim da página) */
+  let ultimo = scrollY;
+  let pedido = false;
+  addEventListener('scroll', () => {
+    if (pedido) return;
+    pedido = true;
+    requestAnimationFrame(() => {
+      pedido = false;
+      const y = scrollY;
+      const noFim = innerHeight + y >= document.documentElement.scrollHeight - 80;
+      if (y > ultimo + 8 && y > 240 && !noFim) dock.classList.add('recolhido');
+      else if (y < ultimo - 8 || noFim || y <= 240) dock.classList.remove('recolhido');
+      ultimo = y;
+    });
+  }, { passive: true });
+  /* quem navega pelo teclado nunca fica com o dock escondido */
+  dock.addEventListener('focusin', () => dock.classList.remove('recolhido'));
 })();
 
 toggleBtn.addEventListener('click', () => setOpen(!island.classList.contains('open')));

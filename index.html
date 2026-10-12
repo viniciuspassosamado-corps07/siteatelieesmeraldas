@@ -24,6 +24,8 @@
       <!-- cores dos ícones e da linha da seção "Do ateliê até a sua casa" -->
       <linearGradient id="gEm" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#6ee7b7"/><stop offset=".55" stop-color="#10b981"/><stop offset="1" stop-color="#047857"/></linearGradient>
       <linearGradient id="jlGrad" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#34d399"/><stop offset="1" stop-color="#047857"/></linearGradient>
+      <!-- ouro dos ícones de "Crie a sua joia" -->
+      <linearGradient id="gOuro" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#fff3c4"/><stop offset=".45" stop-color="#e2b740"/><stop offset="1" stop-color="#a66b12"/></linearGradient>
     </defs>
   </svg>
 
@@ -120,6 +122,150 @@
     <div class="row" id="rowJoias"></div>
   </section>
 
+  <!-- "Crie a sua joia": o cliente monta a encomenda e o pedido chega pronto no WhatsApp do ateliê -->
+  <section class="encomenda" id="encomenda" aria-labelledby="encTitulo">
+    <div class="enc-head">
+      <span class="enc-tag">Sob encomenda</span>
+      <h2 class="stones-title" id="encTitulo">Crie a <span>sua joia</span></h2>
+      <p class="enc-sub">Alianças e joias personalizadas, feitas do seu jeito. Monte o pedido em poucos toques e receba o orçamento pelo WhatsApp.</p>
+    </div>
+
+    <div class="enc-card" id="encCard">
+      <div class="enc-topo">
+        <span class="enc-passo" id="encPasso">Passo 1 de 5</span>
+        <div class="enc-barra" aria-hidden="true"><i id="encBarra"></i></div>
+      </div>
+
+      <form id="encForm" novalidate>
+        <fieldset class="enc-etapa" data-etapa="1">
+          <legend tabindex="-1">Qual peça você quer?</legend>
+          <div class="enc-opcoes enc-pecas" role="radiogroup" aria-label="Peça" data-campo="peca">
+            <button type="button" role="radio" aria-checked="false" data-v="Aliança"><svg viewBox="0 0 64 64" fill="none" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <ellipse cx="25" cy="35" rx="15" ry="16" stroke="#8a5a0b" stroke-width="7.5"/><ellipse cx="25" cy="35" rx="15" ry="16" stroke="url(#gOuro)" stroke-width="5.5"/>
+              <ellipse cx="39" cy="31" rx="15" ry="16" stroke="#8a5a0b" stroke-width="7.5"/><ellipse cx="39" cy="31" rx="15" ry="16" stroke="url(#gOuro)" stroke-width="5.5"/>
+              <path d="M35.6 46.3A15 16 0 0 1 27.6 50.8" stroke="#8a5a0b" stroke-width="7.5"/><path d="M35.6 46.3A15 16 0 0 1 27.6 50.8" stroke="url(#gOuro)" stroke-width="5.5"/>
+              <path d="M13.5 27A15 16 0 0 1 20 20.5M44 16.5A15 16 0 0 1 51 22" stroke="#fff" stroke-opacity=".8" stroke-width="1.4"/>
+              <path d="M53 49l1 2.5 2.5 1-2.5 1-1 2.5-1-2.5-2.5-1 2.5-1z" fill="#34d399"/></svg>Alianças</button>
+            <button type="button" role="radio" aria-checked="false" data-v="Anel"><svg viewBox="0 0 64 64" fill="none" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <ellipse cx="32" cy="43" rx="17" ry="14" stroke="#8a5a0b" stroke-width="6.5"/><ellipse cx="32" cy="43" rx="17" ry="14" stroke="url(#gOuro)" stroke-width="4.5"/>
+              <path d="M17.5 38A17 14 0 0 1 22 32.5" stroke="#fff" stroke-opacity=".8" stroke-width="1.4"/>
+              <path d="M24 30l-2-8M40 30l2-8M32 31v-6" stroke="#a66b12" stroke-width="2.4"/>
+              <path d="M20 16l6-6h12l6 6-12 15z" fill="url(#gEm)" stroke="#064e3b" stroke-width="1.6"/>
+              <path d="M20 16h24M26 10l3 6 3-6 3 6 3-6M29 16l3 15 3-15" stroke="#064e3b" stroke-opacity=".5" stroke-width="1"/>
+              <path d="M27 12.5l2 2.5" stroke="#fff" stroke-opacity=".9" stroke-width="1.5"/></svg>Anel</button>
+            <button type="button" role="radio" aria-checked="false" data-v="Colar"><svg viewBox="0 0 64 64" fill="none" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <path d="M7 5c2 22 14 33 25 33s23-11 25-33" stroke="#a66b12" stroke-width="3.2" stroke-dasharray=".1 4.2"/>
+              <path d="M7 5c2 22 14 33 25 33s23-11 25-33" stroke="url(#gOuro)" stroke-width="2" stroke-dasharray=".1 4.2"/>
+              <circle cx="32" cy="41" r="2.6" stroke="url(#gOuro)" stroke-width="2"/>
+              <path d="M32 44c5 5.5 8 9.5 8 13a8 8 0 0 1-16 0c0-3.5 3-7.5 8-13z" fill="url(#gEm)" stroke="#d4a017" stroke-width="2"/>
+              <path d="M32 47.5l4.5 8.5-4.5 5-4.5-5z" stroke="#064e3b" stroke-opacity=".45" stroke-width="1"/>
+              <path d="M28.5 54.5q.5-3 2.5-5" stroke="#fff" stroke-opacity=".85" stroke-width="1.4"/></svg>Colar</button>
+            <button type="button" role="radio" aria-checked="false" data-v="Brinco"><svg viewBox="0 0 64 64" fill="none" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <g><circle cx="21" cy="9" r="3.6" fill="url(#gOuro)" stroke="#8a5a0b" stroke-width="1"/><path d="M21 12.6V20" stroke="#a66b12" stroke-width="1.8"/>
+              <ellipse cx="21" cy="32" rx="7" ry="11" fill="url(#gEm)" stroke="#d4a017" stroke-width="2.2"/><ellipse cx="21" cy="32" rx="3.5" ry="6.5" stroke="#fff" stroke-opacity=".35" stroke-width="1"/>
+              <path d="M17 28q1-4 3.5-5.5" stroke="#fff" stroke-opacity=".85" stroke-width="1.4"/></g>
+              <g transform="translate(22 6)"><circle cx="21" cy="9" r="3.6" fill="url(#gOuro)" stroke="#8a5a0b" stroke-width="1"/><path d="M21 12.6V20" stroke="#a66b12" stroke-width="1.8"/>
+              <ellipse cx="21" cy="32" rx="7" ry="11" fill="url(#gEm)" stroke="#d4a017" stroke-width="2.2"/><ellipse cx="21" cy="32" rx="3.5" ry="6.5" stroke="#fff" stroke-opacity=".35" stroke-width="1"/>
+              <path d="M17 28q1-4 3.5-5.5" stroke="#fff" stroke-opacity=".85" stroke-width="1.4"/></g></svg>Brinco</button>
+            <button type="button" role="radio" aria-checked="false" data-v="Pingente"><svg viewBox="0 0 64 64" fill="none" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <path d="M6 4c8 11 44 11 52 0" stroke="#a66b12" stroke-width="3" stroke-dasharray=".1 4"/><path d="M6 4c8 11 44 11 52 0" stroke="url(#gOuro)" stroke-width="1.8" stroke-dasharray=".1 4"/>
+              <rect x="29" y="11" width="6" height="10" rx="3" stroke="url(#gOuro)" stroke-width="2.2"/>
+              <path d="M24 22h16l7 7v21l-7 7H24l-7-7V29z" fill="url(#gEm)" stroke="#d4a017" stroke-width="2.6"/>
+              <path d="M26.5 27h11l4.5 4.5v16L37.5 52h-11L22 47.5v-16z" fill="#6ee7b7" fill-opacity=".25" stroke="#064e3b" stroke-opacity=".45" stroke-width="1"/>
+              <path d="M24 22l2.5 5M40 22l-2.5 5M47 29l-5 2.5M47 50l-5-2.5M40 57l-2.5-5M24 57l2.5-5M17 50l5-2.5M17 29l5 2.5" stroke="#064e3b" stroke-opacity=".45" stroke-width="1"/>
+              <path d="M25 31l5-4" stroke="#fff" stroke-opacity=".85" stroke-width="1.6"/></svg>Pingente</button>
+            <button type="button" role="radio" aria-checked="false" data-v="Outra peça"><svg viewBox="0 0 64 64" fill="none" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <path d="M8 22l8-9h18l8 9-17 22z" fill="#ecfdf5" stroke="#047857" stroke-width="1.8" stroke-dasharray="3 3.2"/>
+              <path d="M8 22h34M21 22l4 22 4-22M16 13l5 9 4-9 4 9 5-9" stroke="#047857" stroke-opacity=".45" stroke-width="1" stroke-dasharray="2 2.5"/>
+              <path d="M33 49l19-19 6 6-19 19z" fill="url(#gOuro)" stroke="#064e3b" stroke-width="1.6"/>
+              <path d="M52 30l3-3a3 3 0 0 1 4.2 0l1.8 1.8a3 3 0 0 1 0 4.2L58 36z" fill="#34d399" stroke="#064e3b" stroke-width="1.6"/>
+              <path d="M33 49l6 6-9 3z" fill="#f5deb3" stroke="#064e3b" stroke-width="1.6"/><path d="M30.9 55.4l-.9 2.6 2.6-.9z" fill="#064e3b"/></svg>Outra</button>
+          </div>
+        </fieldset>
+
+        <fieldset class="enc-etapa" data-etapa="2" hidden>
+          <legend tabindex="-1">Em qual metal?</legend>
+          <div class="enc-opcoes enc-lista" role="radiogroup" aria-label="Metal" data-campo="metal">
+            <button type="button" role="radio" aria-checked="false" data-v="Ouro amarelo 18k"><i class="enc-cor" style="--sw:linear-gradient(135deg,#f8e08e,#c99a2e)"></i>Ouro amarelo 18k</button>
+            <button type="button" role="radio" aria-checked="false" data-v="Ouro branco 18k"><i class="enc-cor" style="--sw:linear-gradient(135deg,#f6f7f9,#b8bec6)"></i>Ouro branco 18k</button>
+            <button type="button" role="radio" aria-checked="false" data-v="Ouro rosé 18k"><i class="enc-cor" style="--sw:linear-gradient(135deg,#f9cdbd,#c97b63)"></i>Ouro rosé 18k</button>
+            <button type="button" role="radio" aria-checked="false" data-v="Prata 925"><i class="enc-cor" style="--sw:linear-gradient(135deg,#eceef1,#9aa1a9)"></i>Prata 925</button>
+            <button type="button" role="radio" aria-checked="false" data-v="Ainda não sei"><i class="enc-cor enc-cor-vazia"></i>Ainda não sei</button>
+          </div>
+        </fieldset>
+
+        <fieldset class="enc-etapa" data-etapa="3" hidden>
+          <legend tabindex="-1">Com qual pedra?</legend>
+          <div class="enc-opcoes enc-lista enc-duas" role="radiogroup" aria-label="Pedra" data-campo="pedra">
+            <button type="button" role="radio" aria-checked="false" data-v="Esmeralda"><i class="enc-cor" style="--sw:#12b886"></i>Esmeralda</button>
+            <button type="button" role="radio" aria-checked="false" data-v="Diamante"><i class="enc-cor" style="--sw:linear-gradient(135deg,#ffffff,#bcd4e6)"></i>Diamante</button>
+            <button type="button" role="radio" aria-checked="false" data-v="Safira"><i class="enc-cor" style="--sw:#2f5df0"></i>Safira</button>
+            <button type="button" role="radio" aria-checked="false" data-v="Rubi"><i class="enc-cor" style="--sw:#e11d48"></i>Rubi</button>
+            <button type="button" role="radio" aria-checked="false" data-v="Ametista"><i class="enc-cor" style="--sw:#9d4edd"></i>Ametista</button>
+            <button type="button" role="radio" aria-checked="false" data-v="Topázio"><i class="enc-cor" style="--sw:#f59e0b"></i>Topázio</button>
+            <button type="button" role="radio" aria-checked="false" data-v="Sem pedra"><i class="enc-cor enc-cor-vazia"></i>Sem pedra</button>
+            <button type="button" role="radio" aria-checked="false" data-v="Quero sugestões"><i class="enc-cor enc-cor-vazia"></i>Quero sugestões</button>
+          </div>
+        </fieldset>
+
+        <fieldset class="enc-etapa" data-etapa="4" hidden>
+          <legend tabindex="-1">Conte os detalhes</legend>
+          <div data-so="alianca" hidden>
+            <div class="enc-opcoes enc-chips" role="radiogroup" aria-label="Quantidade" data-campo="par">
+              <button type="button" role="radio" aria-checked="true" data-v="Par">Par de alianças</button>
+              <button type="button" role="radio" aria-checked="false" data-v="Uma">Só uma</button>
+            </div>
+            <div class="enc-aros">
+              <label class="enc-campo"><span data-rotulo-aro1>Aro 1</span><input id="encAro1" inputmode="numeric" maxlength="2" placeholder="Ex.: 16" autocomplete="off"></label>
+              <label class="enc-campo" data-aro2><span>Aro 2</span><input id="encAro2" inputmode="numeric" maxlength="2" placeholder="Ex.: 22" autocomplete="off"></label>
+            </div>
+            <label class="enc-check"><input type="checkbox" id="encNaoSeiAro"> Ainda não sei o tamanho do aro</label>
+            <p class="enc-dica">Sem problema: o ateliê te ajuda a medir antes de produzir.</p>
+            <label class="enc-campo"><span>Gravação interna (opcional)</span><input id="encGravacao" maxlength="40" placeholder="Ex.: Ana &amp; Pedro 12/10/2026" autocomplete="off"></label>
+          </div>
+          <label class="enc-campo"><span data-rotulo-ideia>Descreva sua ideia</span><textarea id="encIdeia" rows="4" maxlength="600" placeholder="Formato, estilo, inspiração... quanto mais detalhes, melhor."></textarea></label>
+        </fieldset>
+
+        <fieldset class="enc-etapa" data-etapa="5" hidden>
+          <legend tabindex="-1">Para quando e quanto investir?</legend>
+          <p class="enc-rotulo">Prazo</p>
+          <div class="enc-opcoes enc-chips" role="radiogroup" aria-label="Prazo" data-campo="prazo">
+            <button type="button" role="radio" aria-checked="false" data-v="Sem pressa">Sem pressa</button>
+            <button type="button" role="radio" aria-checked="false" data-v="Em até 30 dias">Em até 30 dias</button>
+            <button type="button" role="radio" aria-checked="false" data-v="Tenho uma data">Tenho uma data</button>
+          </div>
+          <label class="enc-campo" data-bloco-data hidden><span>Data especial</span><input id="encData" type="date"></label>
+          <p class="enc-rotulo">Orçamento (opcional)</p>
+          <div class="enc-opcoes enc-chips" role="radiogroup" aria-label="Orçamento" data-campo="orcamento">
+            <button type="button" role="radio" aria-checked="false" data-v="Até R$ 1 mil">Até R$ 1 mil</button>
+            <button type="button" role="radio" aria-checked="false" data-v="R$ 1 a 3 mil">R$ 1 a 3 mil</button>
+            <button type="button" role="radio" aria-checked="false" data-v="R$ 3 a 5 mil">R$ 3 a 5 mil</button>
+            <button type="button" role="radio" aria-checked="false" data-v="Acima de R$ 5 mil">Acima de R$ 5 mil</button>
+            <button type="button" role="radio" aria-checked="false" data-v="Prefiro conversar">Prefiro conversar</button>
+          </div>
+        </fieldset>
+
+        <fieldset class="enc-etapa" data-etapa="6" hidden>
+          <legend tabindex="-1">Seu pedido</legend>
+          <dl class="enc-resumo" id="encResumo"></dl>
+          <a class="enc-enviar" id="encEnviar" href="https://wa.me/5511963799306" target="_blank" rel="noopener noreferrer">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4.5 19.5l1.1-3.6A8 8 0 1 1 8.4 18.6z"/><path d="M9.2 8.6c.2-.5.5-.6.8-.6h.5c.2 0 .4.1.5.4l.6 1.4c.1.2 0 .5-.1.6l-.5.6c.5 1 1.3 1.8 2.3 2.3l.6-.5c.2-.2.4-.2.6-.1l1.4.6c.3.1.4.3.4.5v.5c0 .3-.1.6-.6.8-.7.3-1.9.3-3.5-.8-1.3-.9-2.3-2-2.9-3.4-.5-1.2-.4-2-.1-2.3z" fill="currentColor" stroke="none"/></svg>
+            Enviar pedido pelo WhatsApp
+          </a>
+          <p class="enc-dica enc-centro">Tem uma foto de referência? Anexe na conversa depois de enviar.</p>
+          <button type="button" class="enc-recomecar" id="encRecomecar">Recomeçar</button>
+        </fieldset>
+
+        <p class="enc-erro" id="encErro" role="alert" hidden></p>
+      </form>
+
+      <div class="enc-nav">
+        <button type="button" class="enc-voltar" id="encVoltar" hidden>Voltar</button>
+        <button type="button" class="enc-avancar" id="encAvancar">Continuar</button>
+      </div>
+    </div>
+  </section>
+
   <section class="offers" id="ofertas">
     <div class="offers-top">
       <h2 class="stones-title">Ofertas <span>imperdíveis</span></h2>
@@ -199,10 +345,14 @@
     </div>
   </section>
 
-  <!-- botão fixo do WhatsApp (canto inferior direito) -->
-  <a class="wa-fixo" href="https://wa.me/5511963799306?text=Ol%C3%A1!%20Vim%20pelo%20site%20do%20Ateli%C3%AA%20das%20Esmeraldas%20e%20gostaria%20de%20atendimento." target="_blank" rel="noopener noreferrer" aria-label="Falar com o ateliê no WhatsApp">
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4.5 19.5l1.1-3.6A8 8 0 1 1 8.4 18.6z"/><path d="M9.2 8.6c.2-.5.5-.6.8-.6h.5c.2 0 .4.1.5.4l.6 1.4c.1.2 0 .5-.1.6l-.5.6c.5 1 1.3 1.8 2.3 2.3l.6-.5c.2-.2.4-.2.6-.1l1.4.6c.3.1.4.3.4.5v.5c0 .3-.1.6-.6.8-.7.3-1.9.3-3.5-.8-1.3-.9-2.3-2-2.9-3.4-.5-1.2-.4-2-.1-2.3z" fill="currentColor" stroke="none"/></svg>
-  </a>
+  <!-- dock fixo na parte de baixo: atalhos, "Crie a sua joia" em destaque e WhatsApp -->
+  <nav class="dock" id="dock" aria-label="Atalhos">
+    <button type="button" class="dock-item" data-dock="busca" data-dica="Pesquisar" aria-label="Pesquisar"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="6.5"/><path d="M20 20l-4.2-4.2"/></svg></button>
+    <a href="#encomenda" class="dock-joia" data-dock="encomenda"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3l1.8 5.2L19 10l-5.2 1.8L12 17l-1.8-5.2L5 10l5.2-1.8z"/></svg>Crie sua joia</a>
+    <a href="#ofertas" class="dock-item" data-dock="ofertas" data-dica="Ofertas" aria-label="Ofertas"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3.5 12.5l8-8H20v8.5l-8 8z"/><circle cx="16" cy="8" r="1.4"/></svg><b class="dock-badge" hidden></b></a>
+    <span class="dock-sep" aria-hidden="true"></span>
+    <a href="https://wa.me/5511963799306?text=Ol%C3%A1!%20Vim%20pelo%20site%20do%20Ateli%C3%AA%20das%20Esmeraldas%20e%20gostaria%20de%20atendimento." class="dock-item dock-wa" data-dock="whats" data-dica="WhatsApp" aria-label="Falar com o ateliê no WhatsApp" target="_blank" rel="noopener noreferrer"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4.5 19.5l1.1-3.6A8 8 0 1 1 8.4 18.6z"/><path class="dock-wa-fone" d="M9.2 8.6c.2-.5.5-.6.8-.6h.5c.2 0 .4.1.5.4l.6 1.4c.1.2 0 .5-.1.6l-.5.6c.5 1 1.3 1.8 2.3 2.3l.6-.5c.2-.2.4-.2.6-.1l1.4.6c.3.1.4.3.4.5v.5c0 .3-.1.6-.6.8-.7.3-1.9.3-3.5-.8-1.3-.9-2.3-2-2.9-3.4-.5-1.2-.4-2-.1-2.3z"/></svg></a>
+  </nav>
 
   <script src="produtos.js"></script>
   <script src="script.js"></script>
