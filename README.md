@@ -45,7 +45,10 @@ O projeto é um site estático (HTML, CSS e JavaScript puros, sem etapa de build
 - **Banner de abertura** com cena do ateliê e, em seguida, os produtos escolhidos pelo dono (até 5), com transição suave entre as cenas.
 - **Carrossel "Ofertas imperdíveis"** (até 8 ofertas) com efeito de água nas fotos. Ofertas além do limite continuam nas fileiras, com etiqueta de desconto.
 - **Fileiras de pedras e joias** com rolagem horizontal.
+- **"Crie a sua joia"** (encomendas): passo a passo em 5 etapas (peça, metal, pedra, detalhes, prazo e orçamento). Para alianças, pede par ou unidade, aro e gravação. No fim, mostra um resumo e envia o pedido pronto para o WhatsApp do ateliê. Nada é gravado no banco.
 - **"Do ateliê até a sua casa"**: as 5 etapas da entrega. No computador, uma linha ondulada se desenha por trás dos ícones; no celular, uma linha vertical acompanha a rolagem.
+- **Cartão de contato**: o visitante escreve a mensagem e o botão abre o WhatsApp com o texto pronto.
+- **Dock fixo** na parte de baixo: Pesquisar, **Crie sua joia** (em destaque), Ofertas (com a quantidade) e WhatsApp. Recolhe ao rolar para baixo e volta ao rolar para cima.
 - **Folha do produto**: o card se expande em uma janela com galeria de fotos (deslizar, setas e indicadores), título, descrição e preço.
 - **Pesquisa** que filtra os produtos por nome e descrição.
 - **Selos de confiança** animados e CNPJ da empresa.
@@ -90,7 +93,7 @@ Navegador (visitante)                         Navegador (dono)
 .
 ├── index.html              Página pública
 ├── style.css               Estilos do site
-├── script.js               Navbar, carrossel, banner, folha do produto e pesquisa
+├── script.js               Navbar, carrossel, banner, folha do produto, pesquisa, "Crie a sua joia", contato e dock
 ├── produtos.js             Lê o catálogo do Supabase e monta fileiras, carrossel e banner
 ├── ripple.js               Efeito de água do carrossel
 ├── comprimir-imagem.js     Compressão de fotos no navegador (WebP)
@@ -168,6 +171,12 @@ Depois acesse `http://localhost:3000` (site) e `http://localhost:3000/admin` (pa
 O projeto já aponta para o Supabase configurado em `produtos.js` e `admin/config.js`. Para usar outro projeto, troque `SUPABASE_URL` e `SUPABASE_ANON_KEY` nesses dois arquivos, usando **somente a chave pública (anon)**.
 
 > Os arquivos usam ES modules; abrir o `index.html` direto pelo disco (`file://`) não funciona no painel. Use sempre um servidor local.
+
+### WhatsApp do ateliê
+
+O número `5511963799306` aparece 6 vezes: 4 no `index.html` (botão e telefone do cartão de contato, dock e botão final do "Crie a sua joia") e 2 no `script.js` (mensagem do contato e pedido do "Crie a sua joia"). Para trocar, procure por `963799306` e altere todas. O número fica no código, e não no banco, de propósito: quem invadir o painel não consegue desviar o atendimento.
+
+As opções do "Crie a sua joia" (peças, metais, pedras, prazos e faixas de orçamento) estão no `index.html`, na seção `#encomenda`. Cada botão tem um `data-v` com o texto que vai para a mensagem.
 
 ## Painel administrativo
 
@@ -270,6 +279,7 @@ O plano gratuito do Supabase **pausa o projeto após 7 dias sem requisições**.
 
 ## Roadmap
 
+- [ ] Confirmar com o dono as opções reais do "Crie a sua joia" (peças, metais, pedras, prazo médio e faixas de orçamento).
 - [ ] Pagamento online (Pix e cartão) com Asaas, usando Supabase Edge Functions.
 - [ ] Tabela de pedidos com RLS e validação do webhook de pagamento.
 - [ ] Cálculo de frete.
