@@ -2,6 +2,7 @@ name: Ping Supabase
 
 # Evita que o projeto gratuito do Supabase seja pausado por inatividade (7 dias sem requisições).
 # Roda duas vezes por dia (11:00 e 23:00 UTC = 08:00 e 20:00 em Brasília) e pode ser disparado à mão na aba Actions.
+# De quebra, confere que os schemas internos continuam fora da API (alarme abaixo).
 on:
   schedule:
     - cron: '0 11,23 * * *'
@@ -14,15 +15,38 @@ jobs:
   ping:
     runs-on: ubuntu-latest
     timeout-minutes: 2
+    env:
+      SUPABASE_URL: https://vcunrbzfinnnyjviwlag.supabase.co
+      # chave pública (anon), a mesma que já vai no navegador em produtos.js
+      SUPABASE_ANON_KEY: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZjdW5yYnpmaW5ubnlqdml3bGFnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTE2NjAxOTYsImV4cCI6MjEwNzIzNjE5Nn0.t0NRuguarsR5nv6LjtndZj-0JnY0gB-w5ogyBXUsDDo
     steps:
       - name: Consulta pública à API (1 produto)
-        env:
-          SUPABASE_URL: https://vcunrbzfinnnyjviwlag.supabase.co
-          # chave pública (anon), a mesma que já vai no navegador em produtos.js
-          SUPABASE_ANON_KEY: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZjdW5yYnpmaW5ubnlqdml3bGFnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTE2NjAxOTYsImV4cCI6MjEwNzIzNjE5Nn0.t0NRuguarsR5nv6LjtndZj-0JnY0gB-w5ogyBXUsDDo
         run: |
           # --fail faz o job falhar (e o GitHub avisar por e-mail) se a API não responder 2xx
           curl --fail --silent --show-error --retry 3 --retry-delay 10 \
             -H "apikey: $SUPABASE_ANON_KEY" \
             -H "Authorization: Bearer $SUPABASE_ANON_KEY" \
             "$SUPABASE_URL/rest/v1/produtos?select=id&limit=1"
+
+      # Alarme: o pg_net (schema net) dá acesso ao visitante e não temos como tirar (é do Supabase),
+      # e o vault guarda segredos. Os dois só ficam seguros enquanto NÃO estiverem em
+      # Settings → API → Exposed schemas. Se alguém expuser, a API deixa de responder 406/PGRST106
+      # e este passo falha (o GitHub avisa por e-mail).
+      - name: 'Alarme: schemas net e vault fora da API'
+        run: |
+          falhou=0
+          for schema in net vault; do
+            resposta=$(curl --silent --show-error --retry 3 --retry-delay 10 --write-out '\n%{http_code}' \
+              -H "apikey: $SUPABASE_ANON_KEY" \
+              -H "Authorization: Bearer $SUPABASE_ANON_KEY" \
+              -H "Accept-Profile: $schema" \
+              "$SUPABASE_URL/rest/v1/alarme_schema_exposto?select=*&limit=1")
+            status=$(printf '%s' "$resposta" | tail -n 1)
+            if [ "$status" = "406" ] && printf '%s' "$resposta" | grep -q 'PGRST106'; then
+              echo "ok: schema $schema fora da API"
+            else
+              echo "::error::O schema '$schema' respondeu HTTP $status pela API. Tire-o de Settings → API → Exposed schemas no Supabase."
+              falhou=1
+            fi
+          done
+          exit $falhou

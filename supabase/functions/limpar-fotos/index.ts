@@ -8,6 +8,8 @@ const BUCKET = 'produtos';
 const MAX_POR_CHAMADA = 200;   // limite de segurança de arquivos por chamada
 const MAX_CORPO = 20_000;      // bytes
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/;
+// formato do segredo do Vault (2 uuids sem hífens); se um dia trocar o segredo, gere no mesmo formato
+const SEGREDO = /^[0-9a-f]{64}$/;
 const NOME = /^(?:[A-Za-z0-9][A-Za-z0-9._-]{0,120}\.(?:webp|jpe?g|png)|\.emptyFolderPlaceholder)$/;
 
 const json = (status: number, corpo: Record<string, unknown>) =>
@@ -39,9 +41,10 @@ const lerFotos = (v: unknown): Fotos | null => {
 Deno.serve(async (req) => {
   if (req.method !== 'POST') return json(405, { erro: 'metodo' });
 
-  // 1) segredo compartilhado: sem ele (ou errado), nada é lido nem apagado
+  // 1) segredo compartilhado: sem ele (ou errado), nada é lido nem apagado.
+  //    Fora do formato, recusa na hora, sem consultar o banco (não deixa ninguém gastar a cota à toa).
   const segredo = req.headers.get('x-limpeza-segredo') ?? '';
-  if (!segredo) return json(401, { erro: 'nao autorizado' });
+  if (!SEGREDO.test(segredo)) return json(401, { erro: 'nao autorizado' });
 
   const admin = createClient(Deno.env.get('SUPABASE_URL')!, Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!, {
     auth: { persistSession: false, autoRefreshToken: false },

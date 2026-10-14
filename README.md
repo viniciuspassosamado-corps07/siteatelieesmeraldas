@@ -135,20 +135,22 @@ Navegador (visitante)                         Navegador (dono)
 
 **`admins`**: usuários autorizados a escrever. A função `is_admin()` é usada pelas políticas de RLS.
 
-**Storage**: bucket `produtos`, leitura pública, escrita apenas para administradores, aceita JPG, PNG e WebP de até 5 MB.
+**Storage**: bucket `produtos`, leitura pública, escrita apenas para administradores, aceita JPG, PNG e WebP de até 5 MB. O admin só envia para a pasta de um produto (`<uuid>/<arquivo>`), não sobrescreve arquivos e só apaga foto que nenhum produto usa.
 
 ## Segurança
 
 - **RLS ativo** nas tabelas: o público só lê produtos ativos; criar, editar e apagar exige ser admin.
 - **Cadastro público desativado** no Supabase Auth. Novos administradores são criados manualmente.
 - **Senha forte**: o painel exige 12 caracteres ou mais, com maiúscula, minúscula, número e símbolo. A mesma regra precisa estar configurada no Supabase (**Authentication → Policies**), porque a checagem do painel sozinha não impede quem chama a API direto.
-- **Trava contra apagamento em massa**: o banco recusa um único comando que apague mais de 3 produtos, e também o `TRUNCATE`. O painel apaga um produto por vez e não é afetado. Para apagar vários de propósito, use o SQL Editor:
+- **Trava contra apagamento em massa**: o banco recusa um único comando que apague mais de 3 produtos, o `TRUNCATE` e um único comando que troque as fotos (ou a foto do banner) de mais de 3 produtos, porque trocar fotos apaga os arquivos antigos do bucket. Esconder, reordenar ou mudar preço de vários de uma vez continua liberado. O painel mexe em um produto por vez e não é afetado. Para fazer em massa de propósito, use o SQL Editor:
   ```sql
   begin;
   set local app.apagar_em_massa = 'sim';
-  delete from public.produtos where ...;
+  delete from public.produtos where ...;   -- ou: update public.produtos set fotos = ... where ...;
   commit;
   ```
+- **Fotos protegidas no Storage**: o admin só apaga do bucket uma foto que nenhum produto usa. Para uma foto sumir, ela precisa sair do produto antes, e aí as travas acima valem também para o Storage. Uma sessão roubada não consegue esvaziar o bucket de uma vez.
+- **Funções novas no banco nascem fechadas**: só `postgres` e `service_role` podem executá-las. Se o navegador precisar chamar uma função nova, dê `grant execute` explícito (como em `is_admin`).
 - **Content Security Policy** restritiva em `vercel.json` (scripts apenas do próprio domínio, sem inline), além de `X-Content-Type-Options`, `X-Frame-Options: DENY`, `Referrer-Policy` e `Permissions-Policy`.
 - **Dependências locais** em `vendor/`, sem scripts carregados de CDNs.
 - **`/admin` fora dos buscadores** (`noindex, nofollow`).
@@ -237,7 +239,7 @@ produtos (DELETE / UPDATE de fotos) → trigger → pg_net → Edge Function lim
 
 - **Triggers** em `produtos` (`AFTER DELETE` e `AFTER UPDATE OF fotos, foto_banner`) chamam a função de forma assíncrona. Qualquer erro é capturado e nunca trava o apagamento do produto.
 - **Edge Function `limpar-fotos`** ([código](supabase/functions/limpar-fotos/index.ts)) apaga cada foto removida com a miniatura `-thumb` e, ao apagar o produto, o que sobrar na pasta `<id>/`. O Storage só remove o arquivo de verdade pela API, não por SQL.
-- **Autenticação:** a função não usa JWT; ela exige um segredo compartilhado, guardado só no Vault do Supabase, e responde 401 sem ele.
+- **Autenticação:** a função não usa JWT; ela exige um segredo compartilhado, guardado só no Vault do Supabase, e responde 401 sem ele. Segredo fora do formato (64 caracteres hexadecimais) é recusado sem consultar o banco; se um dia trocar o segredo, gere no mesmo formato.
 - **Proteções:** só aceita caminhos no formato `<uuid-do-produto>/<arquivo>`, nunca toca em `exemplo/`, nunca apaga o que algum produto ainda usa e limita a 200 arquivos por chamada.
 - O SQL das triggers está em [`supabase/migrations/passo3_triggers_limpeza.sql`](supabase/migrations/passo3_triggers_limpeza.sql).
 
@@ -255,6 +257,9 @@ A pasta [`supabase/migrations/`](supabase/migrations/) guarda todo o banco em SQ
 | `20261011131754_limpeza_fotos_passo2_funcoes_de_apoio` | Funções de apoio da limpeza de fotos |
 | `passo3_triggers_limpeza` | Triggers da limpeza de fotos (aplicar depois do passo 2) |
 | `20261012040000_trava_apagar_produtos_em_massa` | Trava contra apagar mais de 3 produtos e contra `TRUNCATE` |
+| `20261014233007_trava_trocar_fotos_em_massa` | Trava contra trocar as fotos de mais de 3 produtos num comando |
+| `20261014233043_funcoes_novas_sem_execute_publico` | Funções novas nascem sem `EXECUTE` para o público |
+| `20261014233100_storage_so_apaga_foto_sem_uso` | Storage: só apaga foto sem uso, só envia para `<uuid>/`, sem sobrescrever |
 
 A Edge Function `limpar-fotos` é publicada à parte (pasta `supabase/functions/`).
 
@@ -273,6 +278,7 @@ No plano Pro, o Supabase guarda backups diários do banco por 7 dias.
 O plano gratuito do Supabase **pausa o projeto após 7 dias sem requisições**. Para evitar isso, o workflow [`ping-supabase.yml`](.github/workflows/ping-supabase.yml) faz uma consulta pública à API **duas vezes por dia** (08:00 e 20:00 em Brasília).
 
 - Se a API não responder, o job falha e o GitHub avisa por e-mail.
+- **Alarme de schemas internos:** o mesmo job confere que os schemas `net` (do `pg_net`, que dá acesso ao visitante e não pode ser fechado por nós) e `vault` (segredos) continuam **fora** da API. Se alguém os incluir em **Settings → API → Exposed schemas** no Supabase, o job falha e o GitHub avisa. Nunca exponha esses dois schemas.
 - Para testar: aba **Actions → Ping Supabase → Run workflow**.
 - Se o repositório for público e ficar 60 dias sem commits, o GitHub desativa agendamentos; basta reativar na aba Actions.
 - Se o projeto for pausado mesmo assim, reative-o pelo painel do Supabase.
