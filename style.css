@@ -569,9 +569,9 @@ ul{list-style:none}
 .enc-rotulo{margin:4px 0 8px 2px;font-size:13px;font-weight:600;color:#6e6e73}
 .enc-rotulo ~ .enc-rotulo{margin-top:20px}
 .enc-erro{margin-top:14px;padding:10px 14px;border-radius:12px;background:#fff0f0;color:#c4262e;font-size:14px;font-weight:500}
-.enc-nav{display:flex;align-items:center;gap:12px;margin-top:20px}
+.enc-nav{display:flex;align-items:center;justify-content:center;gap:12px;margin-top:20px}
 .enc-voltar{padding:12px 6px;font-size:15px;font-weight:600;color:#6e6e73}
-.enc-avancar{margin-left:auto;padding:14px 28px;border-radius:999px;background:linear-gradient(135deg,#10b981,#047857);color:#fff;font-size:16px;font-weight:600;box-shadow:0 10px 24px rgba(4,120,87,.3);transition:transform .4s var(--spring),box-shadow .3s}
+.enc-avancar{min-width:200px;padding:14px 28px;border-radius:999px;background:linear-gradient(135deg,#10b981,#047857);color:#fff;font-size:16px;font-weight:600;box-shadow:0 10px 24px rgba(4,120,87,.3);transition:transform .4s var(--spring),box-shadow .3s}
 .enc-avancar:hover{box-shadow:0 14px 30px rgba(4,120,87,.38)}
 .enc-avancar:active{transform:scale(.97)}
 .enc-resumo{border:1px solid #eef0f2;border-radius:18px;overflow:hidden}
@@ -579,8 +579,9 @@ ul{list-style:none}
 .enc-resumo div + div{border-top:1px solid #eef0f2}
 .enc-resumo dt{font-size:13px;color:#86868b}
 .enc-resumo dd{font-size:15px;font-weight:500;color:#1d1d1f;overflow-wrap:anywhere}
-.enc-enviar{display:flex;align-items:center;justify-content:center;gap:10px;margin-top:18px;padding:17px 20px;border-radius:999px;background:linear-gradient(145deg,#34e07a,#16a34a);color:#fff;font-size:17px;font-weight:600;box-shadow:0 12px 28px rgba(22,163,74,.35);transition:transform .4s var(--spring)}
-.enc-enviar svg{width:24px;height:24px}
+.enc-enviar{position:relative;display:flex;align-items:center;justify-content:center;margin-top:18px;padding:17px 58px;border-radius:999px;background:linear-gradient(145deg,#34e07a,#16a34a);color:#fff;font-size:17px;font-weight:600;line-height:1.25;text-align:center;box-shadow:0 12px 28px rgba(22,163,74,.35);transition:transform .4s var(--spring)}
+.enc-enviar svg{position:absolute;left:20px;top:50%;width:32px;height:32px;transform:translateY(-50%)}
+.enc-enviar span{text-wrap:balance}
 .enc-enviar:active{transform:scale(.98)}
 .enc-recomecar{display:block;margin:10px auto 0;padding:8px 12px;font-size:14px;font-weight:600;color:#6e6e73}
 @media (min-width:720px){
